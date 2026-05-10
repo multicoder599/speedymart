@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MegaPay Portal</title>
+    <title>MegaPay Supermarket Portal</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,9 +11,15 @@
     
     <style>
         :root {
-            --pos-brand-color: #0d6efd; 
+            /* Brand Colors */
+            --safaricom-green: #89c53f;
+            --safaricom-red: #e31b23;
+            --megapay-blue: #0d6efd; 
+            
+            /* Theme Colors (Dark Glass) */
             --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --card-border: rgba(255, 255, 255, 0.08);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
         }
@@ -24,163 +30,383 @@
             font-family: 'Cause', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            
+            /* "Busy" Background: Radial + Animated Grid */
+            background-image: 
+                radial-gradient(circle at top right, rgba(13, 110, 253, 0.15), transparent),
+                linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .01) 25%, rgba(255, 255, 255, .01) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .01) 75%, rgba(255, 255, 255, .01) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .01) 25%, rgba(255, 255, 255, .01) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .01) 75%, rgba(255, 255, 255, .01) 76%, transparent 77%, transparent);
+            background-size: 100% 100%, 50px 50px, 50px 50px;
+            animation: backgroundMove 60s linear infinite;
+        }
+
+        @keyframes backgroundMove {
+            0% { background-position: 0 0, 0 0, 0 0; }
+            100% { background-position: 0 0, 500px 1000px, 500px 1000px; }
+        }
+
+        /* --- Global Helpers --- */
+        .hidden { display: none !important; }
+        .success-text { color: var(--safaricom-green) !important; }
+        .error-text { color: var(--safaricom-red) !important; }
+
+        /* --- Branded Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid var(--card-border);
+            z-index: 10;
+        }
+
+        .logo-group { display: flex; align-items: center; gap: 15px; }
+        .logo-group img { height: 35px; width: auto; object-fit: contain; }
+        .divider { height: 25px; width: 1px; background: var(--card-border); }
+        .system-title { font-size: 14px; font-weight: bold; color: var(--text-muted); }
+
+        /* --- Main Content Area --- */
+        main {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
+            position: relative;
+            padding: 20px;
         }
 
+        /* --- Standard Glass Card --- */
         .glass-card {
             background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
             padding: 40px;
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            position: relative;
+            z-index: 1;
         }
 
-        .hidden { display: none !important; }
+        h2 { margin-top: 0; font-weight: 700; text-align: center; }
 
-        h2 {
-            margin-top: 0;
-            font-weight: 600;
-            text-align: center;
-            color: var(--text-main);
-        }
-
+        /* --- Branded Checkout State --- */
         .amount-display {
-            font-size: 36px;
-            font-weight: bold;
-            color: var(--pos-brand-color);
+            font-size: 42px;
+            font-weight: 800;
+            color: #ffffff;
             text-align: center;
-            margin: 20px 0;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            border-left: 4px solid var(--pos-brand-color);
+            margin: 10px 0 30px 0;
+            position: relative;
+        }
+        .amount-display::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 3px;
+            background: var(--safaricom-green);
+            margin: 8px auto 0 auto;
+            border-radius: 2px;
         }
 
         .input-group { margin-bottom: 25px; }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--text-muted);
-            font-size: 14px;
-        }
+        label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
 
         input {
             width: 100%;
-            padding: 14px;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
             color: white;
             font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
             box-sizing: border-box;
             outline: none;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
             font-family: 'Cause', sans-serif;
         }
-
-        input:focus { border-color: var(--pos-brand-color); }
+        input:focus { border-color: var(--megapay-blue); box-shadow: 0 0 15px rgba(13, 110, 253, 0.3); }
+        input[disabled] { opacity: 0.5; cursor: not-allowed; }
 
         button {
             width: 100%;
-            padding: 16px;
-            background-color: var(--pos-brand-color);
+            padding: 18px;
+            background: linear-gradient(135deg, var(--megapay-blue), #0056b3);
             color: #ffffff;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             cursor: pointer;
-            transition: transform 0.1s, opacity 0.3s;
+            transition: all 0.2s;
             font-family: 'Cause', sans-serif;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
+        button:active { transform: translateY(1px); }
+        button:hover:not([disabled]) { box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4); }
+        button[disabled] { opacity: 0.6; cursor: wait; }
 
-        button:active { transform: scale(0.98); }
-        button:hover { opacity: 0.9; }
+        .logout-link { display: block; text-align: center; margin-top: 25px; color: var(--text-muted); font-size: 12px; text-decoration: none; cursor: pointer; transition: color 0.2s; }
+        .logout-link:hover { color: var(--safaricom-red); }
 
-        .status-message {
-            margin-top: 20px;
+        /* --- Interactive Processing State --- */
+        .processing-area {
             text-align: center;
-            font-size: 14px;
-            min-height: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
         }
 
-        .error { color: #f87171; }
-        .success { color: #4ade80; }
-        .loading { color: #facc15; }
+        .mpesa-loader {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+        }
+        .mpesa-logo-static {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            height: 40px; width: auto;
+            z-index: 2;
+        }
+        .pulse-ring {
+            border: 3px solid var(--safaricom-green);
+            border-radius: 50%;
+            height: 100%; width: 100%;
+            position: absolute;
+            left: 0; top: 0;
+            animation: pulse 1.5s ease-out infinite;
+            opacity: 0;
+            box-sizing: border-box;
+        }
+        .pulse-ring:nth-child(2) { animation-delay: 0.5s; }
+
+        @keyframes pulse {
+            0% { transform: scale(0.6); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+
+        .waiting-text { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+        .sub-text { font-size: 13px; color: var(--text-muted); max-width: 250px; }
+
+        /* --- DRAMATIC SUCCESS OVERLAY (Animated Payment Received) --- */
+        #successOverlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, #0f172ab0, #0f172a);
+            backdrop-filter: blur(25px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s;
+            
+            /* Hidden by default in JS */
+        }
+
+        /* Confetti Effect in Background */
+        .confetti-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
+        .confetti {
+            position: absolute; width: 10px; height: 10px; background: var(--safaricom-green);
+            top: -10px; border-radius: 2px;
+            animation: confettiFall linear infinite;
+        }
+        @keyframes confettiFall {
+            to { transform: translateY(105vh) rotate(720deg); }
+        }
+
+        /* Animated Drawing Checkmark */
+        .check-container { width: 150px; height: 150px; position: relative; margin-bottom: 40px; }
         
-        .logout-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: var(--text-muted);
-            font-size: 12px;
-            text-decoration: none;
-            cursor: pointer;
+        .check-background {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: var(--safaricom-green);
+            scale: 0;
+            animation: popIn 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+            animation-delay: 0.3s;
+            box-shadow: 0 10px 40px rgba(137, 197, 63, 0.5);
         }
-        .logout-link:hover { color: var(--pos-brand-color); }
+
+        .check-svg {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px; height: 80px;
+        }
+        .check-polyline {
+            fill: none;
+            stroke: white;
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 200;
+            stroke-dashoffset: 200;
+            animation: drawCheck 0.5s ease-out forwards;
+            animation-delay: 0.8s;
+        }
+
+        @keyframes popIn { to { scale: 1; } }
+        @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+
+        .success-details {
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUp 0.5s forwards;
+            animation-delay: 1.3s;
+        }
+
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+
+        .paid-title { font-size: 28px; font-weight: 900; letter-spacing: -1px; margin: 0; }
+        .receipt-label { text-transform: uppercase; letter-spacing: 2px; font-size: 12px; color: var(--text-muted); margin-top: 15px; margin-bottom: 5px; }
+        .receipt-id { font-family: monospace; font-size: 24px; font-weight: bold; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.1); }
+        .done-btn-group { margin-top: 40px; width: 200px; }
+        .done-btn { background: #ffffff; color: #000; }
     </style>
 </head>
 <body>
 
-    <div class="glass-card" id="loginView">
-        <h2>Admin Access</h2>
-        <form id="loginForm">
-            <div class="input-group">
-                <label for="adminPin">Enter Admin PIN</label>
-                <input type="password" id="adminPin" placeholder="Enter PIN to unlock" required>
-            </div>
-            <button type="submit" id="loginBtn">Unlock System</button>
-        </form>
-        <div class="status-message" id="loginStatus"></div>
-    </div>
+    <header>
+        <div class="logo-group">
+            <img src="megapay-logo.png" alt="MegaPay">
+            <div class="divider"></div>
+            <img src="safaricom-logo.png" alt="Safaricom">
+        </div>
+        <div class="system-title">POS Integration v1.2 </div>
+    </header>
 
-    <div class="glass-card hidden" id="checkoutView">
-        <h2>Complete Payment</h2>
+    <main>
+        <div id="bgDataLines"></div>
+
+        <div class="glass-card" id="loginView">
+            <h2>Admin Access</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="adminPin">Secure Admin PIN</label>
+                    <input type="password" id="adminPin" placeholder="****" required maxlength="4">
+                </div>
+                <button type="submit" id="loginBtn">Unlock Terminal</button>
+            </form>
+            <div class="status-message" id="loginStatus"></div>
+        </div>
+
+        <div class="glass-card hidden" id="checkoutView">
+            
+            <div id="inputStateArea">
+                <h2>Point of Sale</h2>
+                <div class="amount-display" id="displayAmount">Ksh 0.00</div>
+
+                <form id="paymentForm">
+                    <div class="input-group">
+                        <label for="phone">Customer Number (M-PESA)</label>
+                        <input type="tel" id="phone" placeholder="e.g., 0722..." required autocomplete="off">
+                    </div>
+                    <button type="submit" id="submitBtn">Send M-Pesa Request</button>
+                </form>
+                <div class="status-message" id="paymentInputStatus"></div>
+            </div>
+
+            <div id="processingStateArea" class="processing-area hidden">
+                <div class="mpesa-loader">
+                    <img src="mpesa-logo.png" alt="M" class="mpesa-logo-static">
+                    <div class="pulse-ring"></div>
+                    <div class="pulse-ring"></div>
+                </div>
+                <div class="waiting-text success-text">STK PUSH SENT</div>
+                <div class="sub-text">Awaiting customer PIN confirmation... Do not refresh the page.</div>
+                <div class="status-message" id="paymentProcessStatus"></div>
+            </div>
+
+            <a class="logout-link" id="logoutBtn">Lock Terminal</a>
+        </div>
+    </main>
+
+    <div id="successOverlay" class="hidden">
+        <div class="confetti-container" id="confetti"></div>
         
-        <div class="amount-display" id="displayAmount">Ksh 0.00</div>
+        <div class="check-container">
+            <div class="check-background"></div>
+            <svg class="check-svg" viewBox="0 0 100 100">
+                <polyline class="check-polyline" points="20,55 45,80 80,30" />
+            </svg>
+        </div>
 
-        <form id="paymentForm">
-            <div class="input-group">
-                <label for="phone">Customer M-Pesa Number</label>
-                <input type="tel" id="phone" placeholder="e.g., 0712345678" required autocomplete="off">
+        <div class="success-details">
+            <h1 class="paid-title success-text">PAYMENT RECEIVED</h1>
+            
+            <div class="amount-display" id="successAmountDisplay">Ksh 0,000.00</div>
+            
+            <div class="receipt-label">M-Pesa Receipt</div>
+            <div class="receipt-id" id="successReceiptId">XXXXXXXXXX</div>
+
+            <div class="done-btn-group">
+                <button class="done-btn" id="finishBtn">New Transaction</button>
             </div>
-
-            <button type="submit" id="submitBtn">Send STK Push</button>
-        </form>
-
-        <div class="status-message" id="paymentStatus"></div>
-        <a class="logout-link" id="logoutBtn">Lock System (Logout)</a>
+        </div>
     </div>
 
     <script>
         // --- CONFIGURATION ---
-        const SESSION_DURATION_MS = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+        const SESSION_DURATION_MS = 12 * 60 * 60 * 1000; // 12 hours
 
         // --- DOM ELEMENTS ---
-        const loginView = document.getElementById('loginView');
-        const checkoutView = document.getElementById('checkoutView');
-        const loginForm = document.getElementById('loginForm');
-        const paymentForm = document.getElementById('paymentForm');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const loginBtn = document.getElementById('loginBtn');
+        const ui = {
+            login: document.getElementById('loginView'),
+            checkout: document.getElementById('checkoutView'),
+            checkoutInput: document.getElementById('inputStateArea'),
+            checkoutProcess: document.getElementById('processingStateArea'),
+            overlay: document.getElementById('successOverlay'),
+            forms: { login: document.getElementById('loginForm'), payment: document.getElementById('paymentForm') },
+            inputs: { pin: document.getElementById('adminPin'), phone: document.getElementById('phone') },
+            btns: { login: document.getElementById('loginBtn'), payment: document.getElementById('submitBtn'), finish: document.getElementById('finishBtn'), logout: document.getElementById('logoutBtn') },
+            displays: { amount: document.getElementById('displayAmount'), successAmount: document.getElementById('successAmountDisplay'), receipt: document.getElementById('successReceiptId') },
+            status: { login: document.getElementById('loginStatus'), input: document.getElementById('paymentInputStatus'), process: document.getElementById('paymentProcessStatus') }
+        };
 
         // --- URL PARAMETERS ---
         const urlParams = new URLSearchParams(window.location.search);
         let currentAmount = urlParams.get('amount');
 
+        // --- VISUAL SETUP: Confetti ---
+        function createConfetti() {
+            const container = document.getElementById('confetti');
+            container.innerHTML = ''; // clear
+            for (let i = 0; i < 50; i++) {
+                const confetto = document.createElement('div');
+                confetto.classList.add('confetti');
+                confetto.style.left = Math.random() * 100 + 'vw';
+                confetto.style.animationDelay = Math.random() * 2 + 's';
+                confetto.style.animationDuration = Math.random() * 3 + 2 + 's';
+                confetto.style.opacity = Math.random();
+                const colors = ['#89c53f', '#e31b23', '#0d6efd', '#ffffff'];
+                confetto.style.background = colors[Math.floor(Math.random() * colors.length)];
+                container.appendChild(confetto);
+            }
+        }
+
         // --- SESSION MANAGEMENT ---
         function checkSession() {
             const loginTime = localStorage.getItem('megaPaySession');
-            
             if (loginTime) {
                 const timeElapsed = Date.now() - parseInt(loginTime);
                 if (timeElapsed < SESSION_DURATION_MS) {
@@ -194,36 +420,62 @@
         }
 
         function showLogin() {
-            checkoutView.classList.add('hidden');
-            loginView.classList.remove('hidden');
+            ui.checkout.classList.add('hidden');
+            ui.login.classList.remove('hidden');
+            ui.overlay.classList.add('hidden');
         }
 
         function showCheckout() {
-            loginView.classList.add('hidden');
-            checkoutView.classList.remove('hidden');
+            ui.login.classList.add('hidden');
+            ui.overlay.classList.add('hidden');
+            ui.checkout.classList.remove('hidden');
+            resetCheckoutState();
             
             if (!currentAmount || isNaN(currentAmount)) {
                 currentAmount = "0";
-                document.getElementById('paymentStatus').innerHTML = "<span class='error'>Error: No valid amount detected.</span>";
-                document.getElementById('submitBtn').disabled = true;
+                ui.status.input.innerHTML = "<span class='error-text'>⚠️ No valid amount detected from POS.</span>";
+                ui.btns.payment.disabled = true;
+                ui.displays.amount.innerText = 'Ksh 0.00';
             } else {
-                document.getElementById('displayAmount').innerText = 'Ksh ' + Number(currentAmount).toLocaleString();
+                const formatted = Number(currentAmount).toLocaleString('en-KE', { minimumFractionDigits: 2 });
+                ui.displays.amount.innerText = 'Ksh ' + formatted;
+                ui.displays.successAmount.innerText = 'Ksh ' + formatted;
             }
+        }
+
+        function resetCheckoutState() {
+            ui.checkoutInput.classList.remove('hidden');
+            ui.checkoutProcess.classList.add('hidden');
+            ui.btns.payment.disabled = false;
+            ui.status.input.innerHTML = "";
+            ui.status.process.innerHTML = "";
+            ui.inputs.phone.disabled = false;
+        }
+
+        function showProcessingState() {
+            ui.checkoutInput.classList.add('hidden');
+            ui.checkoutProcess.classList.remove('hidden');
+        }
+
+        // --- ACTION: Dramatic Success Overlay ---
+        function animatePaymentReceived(receipt) {
+            ui.checkoutProcess.classList.add('hidden'); // hide loader
+            ui.displays.receipt.innerText = receipt;
+            ui.overlay.classList.remove('hidden'); // show overlay
+            ui.overlay.style.opacity = 1;
+            createConfetti();
         }
 
         // --- EVENT LISTENERS ---
 
-        // Handle Login via Backend
-        loginForm.addEventListener('submit', function(e) {
+        // 1. Handle Login
+        ui.forms.login.addEventListener('submit', function(e) {
             e.preventDefault();
-            const pin = document.getElementById('adminPin').value;
-            const status = document.getElementById('loginStatus');
+            const pin = ui.inputs.pin.value;
+            ui.btns.login.innerText = "Verifying...";
+            ui.btns.login.disabled = true;
+            ui.status.login.innerHTML = "";
 
-            loginBtn.innerText = "Verifying...";
-            loginBtn.disabled = true;
-            status.innerHTML = "";
-
-            // Send PIN to Node.js Backend for verification
             fetch('/api/verify-pin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -232,45 +484,35 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Start the 12-hour session on the frontend
                     localStorage.setItem('megaPaySession', Date.now().toString());
-                    document.getElementById('adminPin').value = ''; 
-                    status.innerHTML = '';
+                    ui.inputs.pin.value = ''; 
                     showCheckout();
                 } else {
-                    status.innerHTML = `<span class='error'>${data.message || "Invalid PIN. Try again."}</span>`;
+                    ui.status.login.innerHTML = `<span class='error-text'>🔒 Invalid PIN. Access Denied.</span>`;
                 }
             })
-            .catch(error => {
-                status.innerHTML = "<span class='error'>Server connection error.</span>";
-            })
+            .catch(() => ui.status.login.innerHTML = "<span class='error-text'>🚫 Server Error.</span>")
             .finally(() => {
-                loginBtn.innerText = "Unlock System";
-                loginBtn.disabled = false;
+                ui.btns.login.innerText = "Unlock Terminal";
+                ui.btns.login.disabled = false;
             });
         });
 
-        // Handle Logout
-        logoutBtn.addEventListener('click', function() {
-            localStorage.removeItem('megaPaySession');
-            showLogin();
-        });
-
-        // Handle Payment Submission
-        paymentForm.addEventListener('submit', function(e) {
+        // 2. Handle Payment Submission
+        ui.forms.payment.addEventListener('submit', function(e) {
             e.preventDefault();
-            const phone = document.getElementById('phone').value.trim();
-            const statusDiv = document.getElementById('paymentStatus');
-            const submitBtn = document.getElementById('submitBtn');
-
-            if (phone.length < 9) {
-                statusDiv.innerHTML = "<span class='error'>Invalid phone number.</span>";
+            const phone = ui.inputs.phone.value.trim();
+            
+            // basic Kenyan format validation (starts with 07, 01, 254)
+            if (!/^(?:254|\+254|0)?(7|1)(?:(?:[0-9][0-9])|(?:0[0-8]))[0-9]{6}$/.test(phone)) {
+                ui.status.input.innerHTML = "<span class='error-text'>⚠️ Invalid M-Pesa format. Use 07...</span>";
                 return;
             }
 
-            submitBtn.innerText = "Processing...";
-            submitBtn.disabled = true;
-            statusDiv.innerHTML = "<span class='loading'>Sending STK Push to customer...</span>";
+            // Go to busy state
+            ui.btns.payment.disabled = true;
+            ui.inputs.phone.disabled = true;
+            showProcessingState();
 
             fetch('/api/initiate-payment', {
                 method: 'POST',
@@ -280,45 +522,48 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    statusDiv.innerHTML = "<span class='success'>STK Push sent! Waiting for PIN...</span>";
+                    // Success, start listening for webhook stream
+                    ui.status.process.innerHTML = "<span class='sub-text'>Waiting for PIN stream...</span>";
                     
-                    // --- THE SSE CONNECTION LOGIC ---
-                    // Open a connection to the server using the unique refId
                     const eventSource = new EventSource(`/api/stream-payment/${data.refId}`);
 
-                    // Listen for the success message from the webhook
                     eventSource.onmessage = function(event) {
                         const result = JSON.parse(event.data);
-                        
                         if (result.success) {
-                            // Update UI heavily to show payment cleared
-                            statusDiv.innerHTML = `<span class='success' style='font-size: 18px; font-weight: bold;'>✅ PAID! Receipt: ${result.receipt}</span>`;
-                            submitBtn.innerText = "Payment Complete";
-                            submitBtn.style.backgroundColor = "#10b981"; // Emerald green color
-                            
-                            // Close the connection as we are done
                             eventSource.close();
+                            // TRIGGER DRAMATIC ANIMATION
+                            animatePaymentReceived(result.receipt);
                         }
                     };
 
-                    // Handle connection errors
                     eventSource.onerror = function() {
-                        console.log("Lost connection to server stream.");
+                        console.log("Stream closed or lost.");
                         eventSource.close();
                     };
-                    // --------------------------------
 
                 } else {
-                    statusDiv.innerHTML = `<span class='error'>Failed: ${data.message}</span>`;
-                    submitBtn.innerText = "Try Again";
-                    submitBtn.disabled = false;
+                    // Fail initiate
+                    resetCheckoutState();
+                    ui.status.input.innerHTML = `<span class='error-text'>❌ STK Fail: ${data.message}</span>`;
                 }
             })
-            .catch(error => {
-                statusDiv.innerHTML = "<span class='error'>Server connection error.</span>";
-                submitBtn.innerText = "Try Again";
-                submitBtn.disabled = false;
+            .catch(() => {
+                resetCheckoutState();
+                ui.status.input.innerHTML = "<span class='error-text'>🚫 Server connection error.</span>";
             });
+        });
+
+        // 3. New Transaction / Finish
+        ui.btns.finish.addEventListener('click', () => {
+            resetCheckoutState();
+            ui.overlay.style.opacity = 0;
+            setTimeout(() => ui.overlay.classList.add('hidden'), 500); // hide after fade
+        });
+
+        // 4. Logout
+        ui.btns.logout.addEventListener('click', () => {
+            localStorage.removeItem('megaPaySession');
+            showLogin();
         });
 
         // Initialize App
