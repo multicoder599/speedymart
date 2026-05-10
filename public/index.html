@@ -161,8 +161,7 @@
         <a class="logout-link" id="logoutBtn">Lock System (Logout)</a>
     </div>
 
-    <script>
-        // --- CONFIGURATION ---
+    // --- CONFIGURATION ---
         const SESSION_DURATION_MS = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
 
         // --- DOM ELEMENTS ---
@@ -281,6 +280,33 @@
             .then(data => {
                 if (data.success) {
                     statusDiv.innerHTML = "<span class='success'>STK Push sent! Waiting for PIN...</span>";
+                    
+                    // --- THE SSE CONNECTION LOGIC ---
+                    // Open a connection to the server using the unique refId
+                    const eventSource = new EventSource(`/api/stream-payment/${data.refId}`);
+
+                    // Listen for the success message from the webhook
+                    eventSource.onmessage = function(event) {
+                        const result = JSON.parse(event.data);
+                        
+                        if (result.success) {
+                            // Update UI heavily to show payment cleared
+                            statusDiv.innerHTML = `<span class='success' style='font-size: 18px; font-weight: bold;'>✅ PAID! Receipt: ${result.receipt}</span>`;
+                            submitBtn.innerText = "Payment Complete";
+                            submitBtn.style.backgroundColor = "#10b981"; // Emerald green color
+                            
+                            // Close the connection as we are done
+                            eventSource.close();
+                        }
+                    };
+
+                    // Handle connection errors
+                    eventSource.onerror = function() {
+                        console.log("Lost connection to server stream.");
+                        eventSource.close();
+                    };
+                    // --------------------------------
+
                 } else {
                     statusDiv.innerHTML = `<span class='error'>Failed: ${data.message}</span>`;
                     submitBtn.innerText = "Try Again";
@@ -296,7 +322,6 @@
 
         // Initialize App
         checkSession();
-    </script>
 
 </body>
 </html>

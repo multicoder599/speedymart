@@ -10,9 +10,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public')); 
 
-// Store pending transactions temporarily in memory (or use SQLite/Redis later)
-// This helps us track when a specific POS invoice gets paid
+// Store pending transactions temporarily in memory
 const pendingTransactions = new Map();
+
+// --- NEW: Array to hold active browser connections for SSE ---
+let connectedClients = [];
+
 // --- ADMIN LOGIN ENDPOINT ---
 app.post('/api/verify-pin', (req, res) => {
     const { pin } = req.body;
@@ -23,6 +26,7 @@ app.post('/api/verify-pin', (req, res) => {
         return res.status(401).json({ success: false, message: "Invalid PIN." });
     }
 });
+
 // --- 1. INITIATE PAYMENT ENDPOINT ---
 app.post('/api/initiate-payment', async (req, res) => {
     const { amount, phoneNumber } = req.body;
@@ -86,6 +90,25 @@ app.post('/api/initiate-payment', async (req, res) => {
     }
 });
 
+// --- NEW: LIVE STATUS ENDPOINT (SSE) ---
+// The frontend connects here and waits for the webhook signal
+app.get('/api/stream-payment/:refId', (req, res) => {
+    const { refId } = req.params;
+
+    // Headers to keep connection open
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const client = { refId, res };
+    connectedClients.push(client);
+
+    // Remove client if they close the tab
+    req.on('close', () => {
+        connectedClients = connectedClients.filter(c => c !== client);
+    });
+});
+
 // --- 2. MEGAPAY WEBHOOK ENDPOINT ---
 app.post('/api/megapay/webhook', async (req, res) => {
     // Acknowledge receipt immediately so MegaPay doesn't resend
@@ -95,7 +118,6 @@ app.post('/api/megapay/webhook', async (req, res) => {
     console.log("Webhook Received:", JSON.stringify(data));
 
     try {
-        // Check if transaction was successful based on your provided logic
         if ((data.ResponseCode !== undefined ? data.ResponseCode : data.ResultCode) != 0) {
             console.log("Failed transaction webhook received.");
             return;
@@ -104,12 +126,29 @@ app.post('/api/megapay/webhook', async (req, res) => {
         const amount = parseFloat(data.TransactionAmount || data.amount || data.Amount);
         const receipt = data.TransactionReceipt || data.MpesaReceiptNumber;
         
-        // In a POS context, we might want to log this to a local database (like SQLite) 
-        // or send a server-sent event (SSE) to the frontend so the UI updates to "Paid" automatically.
-        console.log(`✅ SUCCESSFUL POS PAYMENT: KES ${amount} | Receipt: ${receipt}`);
+        // Grab the last 9 digits of the phone number to match it securely
+        const last9 = (data.Msisdn || data.phone || data.PhoneNumber || "").toString().replace(/\D/g, '').slice(-9);
+        
+        console.log(`✅ SUCCESSFUL POS PAYMENT: KES ${amount} | Receipt: ${receipt} | Phone: ${last9}`);
 
-        // If you want to send a Telegram notification to the supermarket owner, 
-        // you would trigger your Telegram bot function here.
+        // 1. Find the matching pending transaction
+        let matchedRefId = null;
+        for (let [refId, tx] of pendingTransactions.entries()) {
+            if (tx.phone.endsWith(last9) && tx.amount == amount && tx.status === 'Pending') {
+                tx.status = 'Paid';
+                matchedRefId = refId;
+                break;
+            }
+        }
+
+        // 2. If matched, push the success message to the specific frontend tab waiting for it
+        if (matchedRefId) {
+            connectedClients.forEach(client => {
+                if (client.refId === matchedRefId) {
+                    client.res.write(`data: ${JSON.stringify({ success: true, receipt: receipt })}\n\n`);
+                }
+            });
+        }
 
     } catch (err) {
         console.error('Webhook processing error:', err);
