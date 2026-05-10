@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MegaPay Supermarket Portal</title>
+    <title>Supermarket POS Integration</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,7 +35,7 @@
             flex-direction: column;
             overflow: hidden;
             
-            /* "Busy" Background: Radial + Animated Grid */
+            /* "Busy" Background */
             background-image: 
                 radial-gradient(circle at top right, rgba(13, 110, 253, 0.15), transparent),
                 linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .01) 25%, rgba(255, 255, 255, .01) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .01) 75%, rgba(255, 255, 255, .01) 76%, transparent 77%, transparent),
@@ -49,7 +49,6 @@
             100% { background-position: 0 0, 500px 1000px, 500px 1000px; }
         }
 
-        /* --- Global Helpers --- */
         .hidden { display: none !important; }
         .success-text { color: var(--safaricom-green) !important; }
         .error-text { color: var(--safaricom-red) !important; }
@@ -67,7 +66,8 @@
         }
 
         .logo-group { display: flex; align-items: center; gap: 15px; }
-        .logo-group img { height: 35px; width: auto; object-fit: contain; }
+        /* Control logo sizes here */
+        .logo-group img { height: 40px; width: auto; object-fit: contain; max-width: 120px; }
         .divider { height: 25px; width: 1px; background: var(--card-border); }
         .system-title { font-size: 14px; font-weight: bold; color: var(--text-muted); }
 
@@ -81,7 +81,6 @@
             padding: 20px;
         }
 
-        /* --- Standard Glass Card --- */
         .glass-card {
             background: var(--card-bg);
             backdrop-filter: blur(15px);
@@ -96,26 +95,7 @@
             z-index: 1;
         }
 
-        h2 { margin-top: 0; font-weight: 700; text-align: center; }
-
-        /* --- Branded Checkout State --- */
-        .amount-display {
-            font-size: 42px;
-            font-weight: 800;
-            color: #ffffff;
-            text-align: center;
-            margin: 10px 0 30px 0;
-            position: relative;
-        }
-        .amount-display::after {
-            content: '';
-            display: block;
-            width: 50px;
-            height: 3px;
-            background: var(--safaricom-green);
-            margin: 8px auto 0 auto;
-            border-radius: 2px;
-        }
+        h2 { margin-top: 0; margin-bottom: 25px; font-weight: 700; text-align: center; }
 
         .input-group { margin-bottom: 25px; }
         label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
@@ -137,6 +117,33 @@
         }
         input:focus { border-color: var(--megapay-blue); box-shadow: 0 0 15px rgba(13, 110, 253, 0.3); }
         input[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- NEW: Custom Manual Amount Input Styling --- */
+        .currency-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .currency-symbol {
+            position: absolute;
+            left: 15px;
+            color: var(--safaricom-green);
+            font-weight: 800;
+            font-size: 20px;
+            z-index: 2;
+        }
+        #manualAmount {
+            padding-left: 65px; /* Make room for the "Ksh" */
+            font-size: 28px;    /* Make the number big and obvious */
+            height: 65px;
+            color: var(--safaricom-green);
+            text-align: left;
+            border-color: rgba(137, 197, 63, 0.3); /* Slight green border hint */
+        }
+        #manualAmount:focus { border-color: var(--safaricom-green); box-shadow: 0 0 15px rgba(137, 197, 63, 0.3); }
+        /* Hide number arrows */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
         button {
             width: 100%;
@@ -162,122 +169,36 @@
         .logout-link:hover { color: var(--safaricom-red); }
 
         /* --- Interactive Processing State --- */
-        .processing-area {
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 180px;
-        }
-
-        .mpesa-loader {
-            position: relative;
-            width: 60px;
-            height: 60px;
-            margin-bottom: 20px;
-        }
-        .mpesa-logo-static {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            height: 40px; width: auto;
-            z-index: 2;
-        }
-        .pulse-ring {
-            border: 3px solid var(--safaricom-green);
-            border-radius: 50%;
-            height: 100%; width: 100%;
-            position: absolute;
-            left: 0; top: 0;
-            animation: pulse 1.5s ease-out infinite;
-            opacity: 0;
-            box-sizing: border-box;
-        }
+        .processing-area { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 180px; }
+        .mpesa-loader { position: relative; width: 60px; height: 60px; margin-bottom: 20px; }
+        .mpesa-logo-static { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); height: 40px; width: auto; z-index: 2; }
+        .pulse-ring { border: 3px solid var(--safaricom-green); border-radius: 50%; height: 100%; width: 100%; position: absolute; left: 0; top: 0; animation: pulse 1.5s ease-out infinite; opacity: 0; box-sizing: border-box; }
         .pulse-ring:nth-child(2) { animation-delay: 0.5s; }
 
-        @keyframes pulse {
-            0% { transform: scale(0.6); opacity: 0; }
-            50% { opacity: 0.8; }
-            100% { transform: scale(1.2); opacity: 0; }
-        }
-
+        @keyframes pulse { 0% { transform: scale(0.6); opacity: 0; } 50% { opacity: 0.8; } 100% { transform: scale(1.2); opacity: 0; } }
         .waiting-text { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
         .sub-text { font-size: 13px; color: var(--text-muted); max-width: 250px; }
 
-        /* --- DRAMATIC SUCCESS OVERLAY (Animated Payment Received) --- */
-        #successOverlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: linear-gradient(to bottom, #0f172ab0, #0f172a);
-            backdrop-filter: blur(25px);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s;
-            
-            /* Hidden by default in JS */
-        }
-
-        /* Confetti Effect in Background */
+        /* --- Success Overlay --- */
+        #successOverlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: linear-gradient(to bottom, #0f172ab0, #0f172a); backdrop-filter: blur(25px); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
         .confetti-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
-        .confetti {
-            position: absolute; width: 10px; height: 10px; background: var(--safaricom-green);
-            top: -10px; border-radius: 2px;
-            animation: confettiFall linear infinite;
-        }
-        @keyframes confettiFall {
-            to { transform: translateY(105vh) rotate(720deg); }
-        }
+        .confetti { position: absolute; width: 10px; height: 10px; background: var(--safaricom-green); top: -10px; border-radius: 2px; animation: confettiFall linear infinite; }
+        @keyframes confettiFall { to { transform: translateY(105vh) rotate(720deg); } }
 
-        /* Animated Drawing Checkmark */
         .check-container { width: 150px; height: 150px; position: relative; margin-bottom: 40px; }
-        
-        .check-background {
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            background: var(--safaricom-green);
-            scale: 0;
-            animation: popIn 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
-            animation-delay: 0.3s;
-            box-shadow: 0 10px 40px rgba(137, 197, 63, 0.5);
-        }
+        .check-background { width: 100%; height: 100%; border-radius: 50%; background: var(--safaricom-green); scale: 0; animation: popIn 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; animation-delay: 0.3s; box-shadow: 0 10px 40px rgba(137, 197, 63, 0.5); }
+        .check-svg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; }
+        .check-polyline { fill: none; stroke: white; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 200; stroke-dashoffset: 200; animation: drawCheck 0.5s ease-out forwards; animation-delay: 0.8s; }
+        @keyframes popIn { to { scale: 1; } } @keyframes drawCheck { to { stroke-dashoffset: 0; } }
 
-        .check-svg {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80px; height: 80px;
-        }
-        .check-polyline {
-            fill: none;
-            stroke: white;
-            stroke-width: 10;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            stroke-dasharray: 200;
-            stroke-dashoffset: 200;
-            animation: drawCheck 0.5s ease-out forwards;
-            animation-delay: 0.8s;
-        }
-
-        @keyframes popIn { to { scale: 1; } }
-        @keyframes drawCheck { to { stroke-dashoffset: 0; } }
-
-        .success-details {
-            text-align: center;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: slideUp 0.5s forwards;
-            animation-delay: 1.3s;
-        }
-
+        .success-details { text-align: center; opacity: 0; transform: translateY(20px); animation: slideUp 0.5s forwards; animation-delay: 1.3s; }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
 
         .paid-title { font-size: 28px; font-weight: 900; letter-spacing: -1px; margin: 0; }
+        
+        .amount-display { font-size: 42px; font-weight: 800; color: #ffffff; text-align: center; margin: 10px 0 30px 0; position: relative; }
+        .amount-display::after { content: ''; display: block; width: 50px; height: 3px; background: var(--safaricom-green); margin: 8px auto 0 auto; border-radius: 2px; }
+
         .receipt-label { text-transform: uppercase; letter-spacing: 2px; font-size: 12px; color: var(--text-muted); margin-top: 15px; margin-bottom: 5px; }
         .receipt-id { font-family: monospace; font-size: 24px; font-weight: bold; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.1); }
         .done-btn-group { margin-top: 40px; width: 200px; }
@@ -288,13 +209,14 @@
 
     <header>
         <div class="logo-group">
-            <img src="megapay-logo.png" alt="MegaPay">
+            <img src="speedy.png" alt="Brand Logo">
+            
             <div class="divider"></div>
-            <img src="safaricom-logo.png" alt="Safaricom">
+            
+            <img src="megapay-logo.png" alt="Partner Logo">
         </div>
-        <div class="system-title">POS Integration v1.2 </div>
+        <div class="system-title">POS Integration v2.0</div>
     </header>
-
     <main>
         <div id="bgDataLines"></div>
 
@@ -314,13 +236,21 @@
             
             <div id="inputStateArea">
                 <h2>Point of Sale</h2>
-                <div class="amount-display" id="displayAmount">Ksh 0.00</div>
 
                 <form id="paymentForm">
+                    <div class="input-group amount-input-group">
+                        <label for="manualAmount">Transaction Amount</label>
+                        <div class="currency-wrapper">
+                            <span class="currency-symbol">Ksh</span>
+                            <input type="number" id="manualAmount" placeholder="0.00" min="1" step="any" required autocomplete="off">
+                        </div>
+                    </div>
+
                     <div class="input-group">
                         <label for="phone">Customer Number (M-PESA)</label>
                         <input type="tel" id="phone" placeholder="e.g., 0722..." required autocomplete="off">
                     </div>
+                    
                     <button type="submit" id="submitBtn">Send M-Pesa Request</button>
                 </form>
                 <div class="status-message" id="paymentInputStatus"></div>
@@ -328,7 +258,7 @@
 
             <div id="processingStateArea" class="processing-area hidden">
                 <div class="mpesa-loader">
-                    <img src="mpesa-logo.png" alt="M" class="mpesa-logo-static">
+                    <img src="https://via.placeholder.com/40x40/0f172a/89c53f?text=M" alt="M" class="mpesa-logo-static" style="border-radius: 50%;">
                     <div class="pulse-ring"></div>
                     <div class="pulse-ring"></div>
                 </div>
@@ -354,7 +284,7 @@
         <div class="success-details">
             <h1 class="paid-title success-text">PAYMENT RECEIVED</h1>
             
-            <div class="amount-display" id="successAmountDisplay">Ksh 0,000.00</div>
+            <div class="amount-display" id="successAmountDisplay">Ksh 0.00</div>
             
             <div class="receipt-label">M-Pesa Receipt</div>
             <div class="receipt-id" id="successReceiptId">XXXXXXXXXX</div>
@@ -366,10 +296,8 @@
     </div>
 
     <script>
-        // --- CONFIGURATION ---
-        const SESSION_DURATION_MS = 12 * 60 * 60 * 1000; // 12 hours
+        const SESSION_DURATION_MS = 12 * 60 * 60 * 1000; 
 
-        // --- DOM ELEMENTS ---
         const ui = {
             login: document.getElementById('loginView'),
             checkout: document.getElementById('checkoutView'),
@@ -377,20 +305,18 @@
             checkoutProcess: document.getElementById('processingStateArea'),
             overlay: document.getElementById('successOverlay'),
             forms: { login: document.getElementById('loginForm'), payment: document.getElementById('paymentForm') },
-            inputs: { pin: document.getElementById('adminPin'), phone: document.getElementById('phone') },
+            inputs: { pin: document.getElementById('adminPin'), phone: document.getElementById('phone'), amount: document.getElementById('manualAmount') },
             btns: { login: document.getElementById('loginBtn'), payment: document.getElementById('submitBtn'), finish: document.getElementById('finishBtn'), logout: document.getElementById('logoutBtn') },
-            displays: { amount: document.getElementById('displayAmount'), successAmount: document.getElementById('successAmountDisplay'), receipt: document.getElementById('successReceiptId') },
+            displays: { successAmount: document.getElementById('successAmountDisplay'), receipt: document.getElementById('successReceiptId') },
             status: { login: document.getElementById('loginStatus'), input: document.getElementById('paymentInputStatus'), process: document.getElementById('paymentProcessStatus') }
         };
 
-        // --- URL PARAMETERS ---
         const urlParams = new URLSearchParams(window.location.search);
-        let currentAmount = urlParams.get('amount');
+        const urlAmount = urlParams.get('amount');
 
-        // --- VISUAL SETUP: Confetti ---
         function createConfetti() {
             const container = document.getElementById('confetti');
-            container.innerHTML = ''; // clear
+            container.innerHTML = ''; 
             for (let i = 0; i < 50; i++) {
                 const confetto = document.createElement('div');
                 confetto.classList.add('confetti');
@@ -404,7 +330,6 @@
             }
         }
 
-        // --- SESSION MANAGEMENT ---
         function checkSession() {
             const loginTime = localStorage.getItem('megaPaySession');
             if (loginTime) {
@@ -431,15 +356,11 @@
             ui.checkout.classList.remove('hidden');
             resetCheckoutState();
             
-            if (!currentAmount || isNaN(currentAmount)) {
-                currentAmount = "0";
-                ui.status.input.innerHTML = "<span class='error-text'>⚠️ No valid amount detected from POS.</span>";
-                ui.btns.payment.disabled = true;
-                ui.displays.amount.innerText = 'Ksh 0.00';
+            // Auto-fill amount from URL if it exists, otherwise leave blank
+            if (urlAmount && !isNaN(urlAmount)) {
+                ui.inputs.amount.value = urlAmount;
             } else {
-                const formatted = Number(currentAmount).toLocaleString('en-KE', { minimumFractionDigits: 2 });
-                ui.displays.amount.innerText = 'Ksh ' + formatted;
-                ui.displays.successAmount.innerText = 'Ksh ' + formatted;
+                ui.inputs.amount.value = '';
             }
         }
 
@@ -450,6 +371,7 @@
             ui.status.input.innerHTML = "";
             ui.status.process.innerHTML = "";
             ui.inputs.phone.disabled = false;
+            ui.inputs.amount.disabled = false;
         }
 
         function showProcessingState() {
@@ -457,18 +379,15 @@
             ui.checkoutProcess.classList.remove('hidden');
         }
 
-        // --- ACTION: Dramatic Success Overlay ---
-        function animatePaymentReceived(receipt) {
-            ui.checkoutProcess.classList.add('hidden'); // hide loader
+        function animatePaymentReceived(receipt, finalAmount) {
+            ui.checkoutProcess.classList.add('hidden'); 
             ui.displays.receipt.innerText = receipt;
-            ui.overlay.classList.remove('hidden'); // show overlay
+            ui.displays.successAmount.innerText = 'Ksh ' + Number(finalAmount).toLocaleString('en-KE', { minimumFractionDigits: 2 });
+            ui.overlay.classList.remove('hidden'); 
             ui.overlay.style.opacity = 1;
             createConfetti();
         }
 
-        // --- EVENT LISTENERS ---
-
-        // 1. Handle Login
         ui.forms.login.addEventListener('submit', function(e) {
             e.preventDefault();
             const pin = ui.inputs.pin.value;
@@ -488,7 +407,7 @@
                     ui.inputs.pin.value = ''; 
                     showCheckout();
                 } else {
-                    ui.status.login.innerHTML = `<span class='error-text'>🔒 Invalid PIN. Access Denied.</span>`;
+                    ui.status.login.innerHTML = `<span class='error-text'>🔒 Invalid PIN.</span>`;
                 }
             })
             .catch(() => ui.status.login.innerHTML = "<span class='error-text'>🚫 Server Error.</span>")
@@ -498,31 +417,34 @@
             });
         });
 
-        // 2. Handle Payment Submission
         ui.forms.payment.addEventListener('submit', function(e) {
             e.preventDefault();
             const phone = ui.inputs.phone.value.trim();
+            const submittedAmount = ui.inputs.amount.value.trim();
             
-            // basic Kenyan format validation (starts with 07, 01, 254)
             if (!/^(?:254|\+254|0)?(7|1)(?:(?:[0-9][0-9])|(?:0[0-8]))[0-9]{6}$/.test(phone)) {
                 ui.status.input.innerHTML = "<span class='error-text'>⚠️ Invalid M-Pesa format. Use 07...</span>";
                 return;
             }
 
-            // Go to busy state
+            if (!submittedAmount || isNaN(submittedAmount) || Number(submittedAmount) <= 0) {
+                ui.status.input.innerHTML = "<span class='error-text'>⚠️ Please enter a valid amount.</span>";
+                return;
+            }
+
             ui.btns.payment.disabled = true;
             ui.inputs.phone.disabled = true;
+            ui.inputs.amount.disabled = true;
             showProcessingState();
 
             fetch('/api/initiate-payment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount: currentAmount, phoneNumber: phone })
+                body: JSON.stringify({ amount: submittedAmount, phoneNumber: phone })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Success, start listening for webhook stream
                     ui.status.process.innerHTML = "<span class='sub-text'>Waiting for PIN stream...</span>";
                     
                     const eventSource = new EventSource(`/api/stream-payment/${data.refId}`);
@@ -531,8 +453,8 @@
                         const result = JSON.parse(event.data);
                         if (result.success) {
                             eventSource.close();
-                            // TRIGGER DRAMATIC ANIMATION
-                            animatePaymentReceived(result.receipt);
+                            // Pass the manually entered amount to the success screen
+                            animatePaymentReceived(result.receipt, submittedAmount);
                         }
                     };
 
@@ -542,7 +464,6 @@
                     };
 
                 } else {
-                    // Fail initiate
                     resetCheckoutState();
                     ui.status.input.innerHTML = `<span class='error-text'>❌ STK Fail: ${data.message}</span>`;
                 }
@@ -553,20 +474,21 @@
             });
         });
 
-        // 3. New Transaction / Finish
         ui.btns.finish.addEventListener('click', () => {
             resetCheckoutState();
+            // Clear the inputs for the next customer
+            ui.inputs.amount.value = '';
+            ui.inputs.phone.value = '';
+            
             ui.overlay.style.opacity = 0;
-            setTimeout(() => ui.overlay.classList.add('hidden'), 500); // hide after fade
+            setTimeout(() => ui.overlay.classList.add('hidden'), 500); 
         });
 
-        // 4. Logout
         ui.btns.logout.addEventListener('click', () => {
             localStorage.removeItem('megaPaySession');
             showLogin();
         });
 
-        // Initialize App
         checkSession();
     </script>
 
