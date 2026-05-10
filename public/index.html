@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MegaPay Portal</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cause:wght@100..900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --pos-brand-color: #0d6efd; 
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Cause', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .hidden { display: none !important; }
+
+        h2 {
+            margin-top: 0;
+            font-weight: 600;
+            text-align: center;
+            color: var(--text-main);
+        }
+
+        .amount-display {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--pos-brand-color);
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border-left: 4px solid var(--pos-brand-color);
+        }
+
+        .input-group { margin-bottom: 25px; }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: 'Cause', sans-serif;
+        }
+
+        input:focus { border-color: var(--pos-brand-color); }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--pos-brand-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.3s;
+            font-family: 'Cause', sans-serif;
+        }
+
+        button:active { transform: scale(0.98); }
+        button:hover { opacity: 0.9; }
+
+        .status-message {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            min-height: 20px;
+        }
+
+        .error { color: #f87171; }
+        .success { color: #4ade80; }
+        .loading { color: #facc15; }
+        
+        .logout-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-muted);
+            font-size: 12px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .logout-link:hover { color: var(--pos-brand-color); }
+    </style>
+</head>
+<body>
+
+    <div class="glass-card" id="loginView">
+        <h2>Admin Access</h2>
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="adminPin">Enter Admin PIN</label>
+                <input type="password" id="adminPin" placeholder="Enter PIN to unlock" required>
+            </div>
+            <button type="submit" id="loginBtn">Unlock System</button>
+        </form>
+        <div class="status-message" id="loginStatus"></div>
+    </div>
+
+    <div class="glass-card hidden" id="checkoutView">
+        <h2>Complete Payment</h2>
+        
+        <div class="amount-display" id="displayAmount">Ksh 0.00</div>
+
+        <form id="paymentForm">
+            <div class="input-group">
+                <label for="phone">Customer M-Pesa Number</label>
+                <input type="tel" id="phone" placeholder="e.g., 0712345678" required autocomplete="off">
+            </div>
+
+            <button type="submit" id="submitBtn">Send STK Push</button>
+        </form>
+
+        <div class="status-message" id="paymentStatus"></div>
+        <a class="logout-link" id="logoutBtn">Lock System (Logout)</a>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const SESSION_DURATION_MS = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+
+        // --- DOM ELEMENTS ---
+        const loginView = document.getElementById('loginView');
+        const checkoutView = document.getElementById('checkoutView');
+        const loginForm = document.getElementById('loginForm');
+        const paymentForm = document.getElementById('paymentForm');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loginBtn = document.getElementById('loginBtn');
+
+        // --- URL PARAMETERS ---
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentAmount = urlParams.get('amount');
+
+        // --- SESSION MANAGEMENT ---
+        function checkSession() {
+            const loginTime = localStorage.getItem('megaPaySession');
+            
+            if (loginTime) {
+                const timeElapsed = Date.now() - parseInt(loginTime);
+                if (timeElapsed < SESSION_DURATION_MS) {
+                    showCheckout();
+                    return;
+                } else {
+                    localStorage.removeItem('megaPaySession');
+                }
+            }
+            showLogin();
+        }
+
+        function showLogin() {
+            checkoutView.classList.add('hidden');
+            loginView.classList.remove('hidden');
+        }
+
+        function showCheckout() {
+            loginView.classList.add('hidden');
+            checkoutView.classList.remove('hidden');
+            
+            if (!currentAmount || isNaN(currentAmount)) {
+                currentAmount = "0";
+                document.getElementById('paymentStatus').innerHTML = "<span class='error'>Error: No valid amount detected.</span>";
+                document.getElementById('submitBtn').disabled = true;
+            } else {
+                document.getElementById('displayAmount').innerText = 'Ksh ' + Number(currentAmount).toLocaleString();
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+
+        // Handle Login via Backend
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const pin = document.getElementById('adminPin').value;
+            const status = document.getElementById('loginStatus');
+
+            loginBtn.innerText = "Verifying...";
+            loginBtn.disabled = true;
+            status.innerHTML = "";
+
+            // Send PIN to Node.js Backend for verification
+            fetch('/api/verify-pin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: pin })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Start the 12-hour session on the frontend
+                    localStorage.setItem('megaPaySession', Date.now().toString());
+                    document.getElementById('adminPin').value = ''; 
+                    status.innerHTML = '';
+                    showCheckout();
+                } else {
+                    status.innerHTML = `<span class='error'>${data.message || "Invalid PIN. Try again."}</span>`;
+                }
+            })
+            .catch(error => {
+                status.innerHTML = "<span class='error'>Server connection error.</span>";
+            })
+            .finally(() => {
+                loginBtn.innerText = "Unlock System";
+                loginBtn.disabled = false;
+            });
+        });
+
+        // Handle Logout
+        logoutBtn.addEventListener('click', function() {
+            localStorage.removeItem('megaPaySession');
+            showLogin();
+        });
+
+        // Handle Payment Submission
+        paymentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const phone = document.getElementById('phone').value.trim();
+            const statusDiv = document.getElementById('paymentStatus');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (phone.length < 9) {
+                statusDiv.innerHTML = "<span class='error'>Invalid phone number.</span>";
+                return;
+            }
+
+            submitBtn.innerText = "Processing...";
+            submitBtn.disabled = true;
+            statusDiv.innerHTML = "<span class='loading'>Sending STK Push to customer...</span>";
+
+            fetch('/api/initiate-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: currentAmount, phoneNumber: phone })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    statusDiv.innerHTML = "<span class='success'>STK Push sent! Waiting for PIN...</span>";
+                } else {
+                    statusDiv.innerHTML = `<span class='error'>Failed: ${data.message}</span>`;
+                    submitBtn.innerText = "Try Again";
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                statusDiv.innerHTML = "<span class='error'>Server connection error.</span>";
+                submitBtn.innerText = "Try Again";
+                submitBtn.disabled = false;
+            });
+        });
+
+        // Initialize App
+        checkSession();
+    </script>
+
+</body>
+</html>
