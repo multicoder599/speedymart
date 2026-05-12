@@ -66,7 +66,6 @@
         }
 
         .logo-group { display: flex; align-items: center; gap: 15px; }
-        /* Control logo sizes here */
         .logo-group img { height: 40px; width: auto; object-fit: contain; max-width: 120px; }
         .divider { height: 25px; width: 1px; background: var(--card-border); }
         .system-title { font-size: 14px; font-weight: bold; color: var(--text-muted); }
@@ -118,63 +117,36 @@
         input:focus { border-color: var(--megapay-blue); box-shadow: 0 0 15px rgba(13, 110, 253, 0.3); }
         input[disabled] { opacity: 0.5; cursor: not-allowed; }
 
-        /* --- NEW: Custom Manual Amount Input Styling --- */
-        .currency-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        .currency-symbol {
-            position: absolute;
-            left: 15px;
-            color: var(--safaricom-green);
-            font-weight: 800;
-            font-size: 20px;
-            z-index: 2;
-        }
-        #manualAmount {
-            padding-left: 65px; /* Make room for the "Ksh" */
-            font-size: 28px;    /* Make the number big and obvious */
-            height: 65px;
-            color: var(--safaricom-green);
-            text-align: left;
-            border-color: rgba(137, 197, 63, 0.3); /* Slight green border hint */
-        }
+        .currency-wrapper { position: relative; display: flex; align-items: center; }
+        .currency-symbol { position: absolute; left: 15px; color: var(--safaricom-green); font-weight: 800; font-size: 20px; z-index: 2; }
+        #manualAmount { padding-left: 65px; font-size: 28px; height: 65px; color: var(--safaricom-green); text-align: left; border-color: rgba(137, 197, 63, 0.3); }
         #manualAmount:focus { border-color: var(--safaricom-green); box-shadow: 0 0 15px rgba(137, 197, 63, 0.3); }
-        /* Hide number arrows */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
         button {
-            width: 100%;
-            padding: 18px;
+            width: 100%; padding: 18px;
             background: linear-gradient(135deg, var(--megapay-blue), #0056b3);
-            color: #ffffff;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'Cause', sans-serif;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            color: #ffffff; border: none; border-radius: 10px;
+            font-size: 16px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; cursor: pointer; transition: all 0.2s;
+            font-family: 'Cause', sans-serif; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         button:active { transform: translateY(1px); }
         button:hover:not([disabled]) { box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4); }
         button[disabled] { opacity: 0.6; cursor: wait; }
 
-        .logout-link { display: block; text-align: center; margin-top: 25px; color: var(--text-muted); font-size: 12px; text-decoration: none; cursor: pointer; transition: color 0.2s; }
+        /* --- NEW: Bottom Links --- */
+        .bottom-links { display: flex; justify-content: space-between; margin-top: 25px; }
+        .text-link { color: var(--text-muted); font-size: 12px; text-decoration: none; cursor: pointer; transition: color 0.2s; font-weight: bold; text-transform: uppercase; }
+        .text-link:hover { color: #ffffff; }
         .logout-link:hover { color: var(--safaricom-red); }
 
-        /* --- Interactive Processing State --- */
+        /* --- Processing State --- */
         .processing-area { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 180px; }
         .mpesa-loader { position: relative; width: 60px; height: 60px; margin-bottom: 20px; }
         .mpesa-logo-static { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); height: 40px; width: auto; z-index: 2; }
         .pulse-ring { border: 3px solid var(--safaricom-green); border-radius: 50%; height: 100%; width: 100%; position: absolute; left: 0; top: 0; animation: pulse 1.5s ease-out infinite; opacity: 0; box-sizing: border-box; }
         .pulse-ring:nth-child(2) { animation-delay: 0.5s; }
-
         @keyframes pulse { 0% { transform: scale(0.6); opacity: 0; } 50% { opacity: 0.8; } 100% { transform: scale(1.2); opacity: 0; } }
         .waiting-text { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
         .sub-text { font-size: 13px; color: var(--text-muted); max-width: 250px; }
@@ -184,25 +156,35 @@
         .confetti-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
         .confetti { position: absolute; width: 10px; height: 10px; background: var(--safaricom-green); top: -10px; border-radius: 2px; animation: confettiFall linear infinite; }
         @keyframes confettiFall { to { transform: translateY(105vh) rotate(720deg); } }
-
         .check-container { width: 150px; height: 150px; position: relative; margin-bottom: 40px; }
         .check-background { width: 100%; height: 100%; border-radius: 50%; background: var(--safaricom-green); scale: 0; animation: popIn 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; animation-delay: 0.3s; box-shadow: 0 10px 40px rgba(137, 197, 63, 0.5); }
         .check-svg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; }
         .check-polyline { fill: none; stroke: white; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 200; stroke-dashoffset: 200; animation: drawCheck 0.5s ease-out forwards; animation-delay: 0.8s; }
         @keyframes popIn { to { scale: 1; } } @keyframes drawCheck { to { stroke-dashoffset: 0; } }
-
         .success-details { text-align: center; opacity: 0; transform: translateY(20px); animation: slideUp 0.5s forwards; animation-delay: 1.3s; }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-
         .paid-title { font-size: 28px; font-weight: 900; letter-spacing: -1px; margin: 0; }
-        
         .amount-display { font-size: 42px; font-weight: 800; color: #ffffff; text-align: center; margin: 10px 0 30px 0; position: relative; }
         .amount-display::after { content: ''; display: block; width: 50px; height: 3px; background: var(--safaricom-green); margin: 8px auto 0 auto; border-radius: 2px; }
-
         .receipt-label { text-transform: uppercase; letter-spacing: 2px; font-size: 12px; color: var(--text-muted); margin-top: 15px; margin-bottom: 5px; }
         .receipt-id { font-family: monospace; font-size: 24px; font-weight: bold; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.1); }
         .done-btn-group { margin-top: 40px; width: 200px; }
         .done-btn { background: #ffffff; color: #000; }
+
+        /* --- NEW: Report View Styles --- */
+        #reportView { max-width: 600px; width: 90%; }
+        .report-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 1px solid var(--card-border); padding-bottom: 15px; }
+        .report-header h2 { margin: 0; text-align: left; }
+        .report-total { font-size: 24px; font-weight: 800; color: var(--safaricom-green); }
+        .table-container { max-height: 300px; overflow-y: auto; margin-bottom: 20px; border-radius: 8px; background: rgba(0,0,0,0.2); }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th { background: rgba(255,255,255,0.05); padding: 12px; color: var(--text-muted); font-weight: bold; text-transform: uppercase; font-size: 12px; position: sticky; top: 0; }
+        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .tx-receipt { font-family: monospace; color: #fff; font-weight: bold; }
+        .tx-amount { color: var(--safaricom-green); font-weight: bold; }
+        .empty-state { text-align: center; padding: 30px; color: var(--text-muted); }
+        .back-btn { background: rgba(255,255,255,0.1); }
+        .back-btn:hover { background: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
@@ -210,13 +192,12 @@
     <header>
         <div class="logo-group">
             <img src="speedy.png" alt="Brand Logo">
-            
             <div class="divider"></div>
-            
             <img src="megapay-logo.png" alt="Partner Logo">
         </div>
-        <div class="system-title">POS Integration v2.0</div>
+        <div class="system-title">POS Integration v2.1</div>
     </header>
+    
     <main>
         <div id="bgDataLines"></div>
 
@@ -233,7 +214,6 @@
         </div>
 
         <div class="glass-card hidden" id="checkoutView">
-            
             <div id="inputStateArea">
                 <h2>Point of Sale</h2>
 
@@ -267,7 +247,38 @@
                 <div class="status-message" id="paymentProcessStatus"></div>
             </div>
 
-            <a class="logout-link" id="logoutBtn">Lock Terminal</a>
+            <div class="bottom-links">
+                <a class="text-link" id="viewReportBtn">📊 Daily Report</a>
+                <a class="text-link logout-link" id="logoutBtn">🔒 Lock Terminal</a>
+            </div>
+        </div>
+
+        <div class="glass-card hidden" id="reportView">
+            <div class="report-header">
+                <div>
+                    <h2>Today's Summary</h2>
+                    <div style="font-size: 13px; color: var(--text-muted);" id="reportDate">Loading...</div>
+                </div>
+                <div class="report-total" id="reportTotal">Ksh 0.00</div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Receipt</th>
+                            <th>Phone</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        <tr><td colspan="4" class="empty-state">Loading transactions...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <button class="back-btn" id="backToPosBtn">Back to POS</button>
         </div>
     </main>
 
@@ -301,12 +312,13 @@
         const ui = {
             login: document.getElementById('loginView'),
             checkout: document.getElementById('checkoutView'),
+            report: document.getElementById('reportView'),
             checkoutInput: document.getElementById('inputStateArea'),
             checkoutProcess: document.getElementById('processingStateArea'),
             overlay: document.getElementById('successOverlay'),
             forms: { login: document.getElementById('loginForm'), payment: document.getElementById('paymentForm') },
             inputs: { pin: document.getElementById('adminPin'), phone: document.getElementById('phone'), amount: document.getElementById('manualAmount') },
-            btns: { login: document.getElementById('loginBtn'), payment: document.getElementById('submitBtn'), finish: document.getElementById('finishBtn'), logout: document.getElementById('logoutBtn') },
+            btns: { login: document.getElementById('loginBtn'), payment: document.getElementById('submitBtn'), finish: document.getElementById('finishBtn'), logout: document.getElementById('logoutBtn'), viewReport: document.getElementById('viewReportBtn'), backToPos: document.getElementById('backToPosBtn') },
             displays: { successAmount: document.getElementById('successAmountDisplay'), receipt: document.getElementById('successReceiptId') },
             status: { login: document.getElementById('loginStatus'), input: document.getElementById('paymentInputStatus'), process: document.getElementById('paymentProcessStatus') }
         };
@@ -346,22 +358,63 @@
 
         function showLogin() {
             ui.checkout.classList.add('hidden');
+            ui.report.classList.add('hidden');
             ui.login.classList.remove('hidden');
             ui.overlay.classList.add('hidden');
         }
 
         function showCheckout() {
             ui.login.classList.add('hidden');
+            ui.report.classList.add('hidden');
             ui.overlay.classList.add('hidden');
             ui.checkout.classList.remove('hidden');
             resetCheckoutState();
             
-            // Auto-fill amount from URL if it exists, otherwise leave blank
             if (urlAmount && !isNaN(urlAmount)) {
                 ui.inputs.amount.value = urlAmount;
             } else {
                 ui.inputs.amount.value = '';
             }
+        }
+
+        function showReport() {
+            ui.checkout.classList.add('hidden');
+            ui.report.classList.remove('hidden');
+            
+            document.getElementById('reportDate').innerText = new Date().toLocaleDateString('en-KE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const tbody = document.getElementById('reportTableBody');
+            tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Loading transactions...</td></tr>';
+            
+            fetch('/api/transactions/today')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('reportTotal').innerText = 'Ksh ' + Number(data.total).toLocaleString('en-KE', { minimumFractionDigits: 2 });
+                        
+                        if (data.transactions.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No transactions yet today.</td></tr>';
+                            return;
+                        }
+
+                        tbody.innerHTML = '';
+                        data.transactions.forEach(tx => {
+                            const timeStr = new Date(tx.time).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
+                            const amountStr = Number(tx.amount).toLocaleString('en-KE', { minimumFractionDigits: 2 });
+                            
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td>${timeStr}</td>
+                                    <td class="tx-receipt">${tx.receipt}</td>
+                                    <td>${tx.phone}</td>
+                                    <td class="tx-amount">Ksh ${amountStr}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                })
+                .catch(err => {
+                    tbody.innerHTML = '<tr><td colspan="4" class="error-text empty-state">Failed to load data.</td></tr>';
+                });
         }
 
         function resetCheckoutState() {
@@ -453,7 +506,6 @@
                         const result = JSON.parse(event.data);
                         if (result.success) {
                             eventSource.close();
-                            // Pass the manually entered amount to the success screen
                             animatePaymentReceived(result.receipt, submittedAmount);
                         }
                     };
@@ -476,13 +528,15 @@
 
         ui.btns.finish.addEventListener('click', () => {
             resetCheckoutState();
-            // Clear the inputs for the next customer
             ui.inputs.amount.value = '';
             ui.inputs.phone.value = '';
-            
             ui.overlay.style.opacity = 0;
             setTimeout(() => ui.overlay.classList.add('hidden'), 500); 
         });
+
+        // Report Nav Listeners
+        ui.btns.viewReport.addEventListener('click', showReport);
+        ui.btns.backToPos.addEventListener('click', showCheckout);
 
         ui.btns.logout.addEventListener('click', () => {
             localStorage.removeItem('megaPaySession');
@@ -491,6 +545,5 @@
 
         checkSession();
     </script>
-
 </body>
 </html>

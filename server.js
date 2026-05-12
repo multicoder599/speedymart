@@ -13,7 +13,10 @@ app.use(express.static('public'));
 // Store pending transactions temporarily in memory
 const pendingTransactions = new Map();
 
-// --- NEW: Array to hold active browser connections for SSE ---
+// --- NEW: Store completed transactions for the daily report ---
+const completedTransactions = [];
+
+// Array to hold active browser connections for SSE
 let connectedClients = [];
 
 // --- ADMIN LOGIN ENDPOINT ---
@@ -90,7 +93,7 @@ app.post('/api/initiate-payment', async (req, res) => {
     }
 });
 
-// --- NEW: LIVE STATUS ENDPOINT (SSE) ---
+// --- LIVE STATUS ENDPOINT (SSE) ---
 // The frontend connects here and waits for the webhook signal
 app.get('/api/stream-payment/:refId', (req, res) => {
     const { refId } = req.params;
@@ -137,6 +140,16 @@ app.post('/api/megapay/webhook', async (req, res) => {
             if (tx.phone.endsWith(last9) && tx.amount == amount && tx.status === 'Pending') {
                 tx.status = 'Paid';
                 matchedRefId = refId;
+                
+                // --- NEW: Save to completed transactions list for EOD Report ---
+                completedTransactions.push({
+                    receipt: receipt,
+                    amount: amount,
+                    phone: tx.phone,
+                    time: new Date().toISOString()
+                });
+                // ---------------------------------------------------------------
+                
                 break;
             }
         }
@@ -153,6 +166,26 @@ app.post('/api/megapay/webhook', async (req, res) => {
     } catch (err) {
         console.error('Webhook processing error:', err);
     }
+});
+
+// --- 3. DAILY REPORT ENDPOINT ---
+app.get('/api/transactions/today', (req, res) => {
+    // Get today's date in YYYY-MM-DD format based on Kenyan Time
+    const today = new Date().toLocaleString("en-US", {timeZone: "Africa/Nairobi"});
+    const todayDateString = new Date(today).toISOString().split('T')[0];
+
+    // Filter transactions that happened today
+    const todaysTx = completedTransactions.filter(tx => tx.time.startsWith(todayDateString));
+    
+    // Calculate total
+    const totalAmount = todaysTx.reduce((sum, tx) => sum + tx.amount, 0);
+
+    res.status(200).json({
+        success: true,
+        total: totalAmount,
+        count: todaysTx.length,
+        transactions: todaysTx.reverse() // Reverse so newest is at the top
+    });
 });
 
 app.listen(PORT, () => {
