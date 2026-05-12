@@ -16,7 +16,7 @@ app.use(express.static('public'));
 
 // --- CONNECT TO SHARED DATABASE ---
 // This assumes your admin folder is named 'speedymart-admin' and is right next to this folder
-const dbPath = path.resolve(__dirname, '../speedymart-admin/database.sqlite');
+const dbPath = '/home/newuser/speedymart-admin/database.sqlite';
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) console.error("Database connection error. Check path:", err);
     else console.log(`✅ Connected to Central Database as Store ID: ${STORE_ID}`);
@@ -58,7 +58,11 @@ app.post('/api/initiate-payment', async (req, res) => {
         email:        process.env.MEGAPAY_EMAIL,
         amount:       amount,
         msisdn:       formattedPhone,
-        callback_url: `${process.env.APP_URL}/api/megapay/webhook`,
+        
+        // --- CHANGED: Now points to the Boss Admin Broadcaster! ---
+        callback_url: `http://213.199.41.83:3009/api/megapay/unified-webhook`, 
+        // ----------------------------------------------------------
+        
         description:  `Supermarket ${STORE_ID} Checkout`,
         reference:    reference
     };
