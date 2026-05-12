@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpeedyMart Boss Panel</title>
+    <title>SpeedyMart Admin Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Cause:wght@100..900&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; font-family: 'Cause', sans-serif; background: #0f172a; color: #f8fafc; }
@@ -43,7 +43,7 @@
 <body>
 
     <div id="loginView" class="container card">
-        <h2 style="text-align: center;">Boss Login</h2>
+        <h2 style="text-align: center;">Super Admin Login</h2>
         <input type="text" id="adminUser" placeholder="Username">
         <input type="password" id="adminPass" placeholder="Password">
         <button onclick="login()">Access System</button>
@@ -63,8 +63,8 @@
             <div class="card">
                 <h2>Branch & Day Filter</h2>
                 <select id="storeFilter" onchange="loadTransactions()">
-                    <option value="3007">Gatanga Branch</option>
-                    <option value="3008">Thika Branch</option>
+                    <option value="3007">Gatunga Branch</option>
+                    <option value="3008">Marimanti Branch</option>
                 </select>
                 <div class="day-filters" id="dayFilters"></div>
             </div>
@@ -86,8 +86,8 @@
                     <input type="text" id="newUsername" placeholder="Username (e.g., jane_gatanga)">
                     <input type="password" id="newPassword" placeholder="Password (Leave blank if editing to keep old)">
                     <select id="newStore">
-                        <option value="3007">Gatanga Branch</option>
-                        <option value="3008">Thika Branch</option>
+                        <option value="3007">Gatunga Branch</option>
+                        <option value="3008">Marimanti Branch</option>
                     </select>
                     <button id="cashierSubmitBtn" style="width: 150px;" onclick="saveCashier()">Create</button>
                     <button id="cashierCancelBtn" class="hidden btn-danger" style="width: 100px;" onclick="resetCashierForm()">Cancel</button>
@@ -244,7 +244,7 @@
                 const tbody = document.getElementById('cashierTable');
                 tbody.innerHTML = '';
                 data.cashiers.forEach(c => {
-                    const storeName = c.store_id === '3007' ? 'Gatanga' : 'Thika';
+                    const storeName = c.store_id === '3007' ? 'Gatunga' : 'Marimanti';
                     tbody.innerHTML += `<tr>
                         <td>${c.username}</td>
                         <td>${storeName}</td>
