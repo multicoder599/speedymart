@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supermarket POS Integration</title>
+    <title>SpeedyMart POS Terminal</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,10 +11,12 @@
     
     <style>
         :root {
-            var(--safaricom-green): #89c53f;
+            /* Brand Colors */
             --safaricom-green: #89c53f;
             --safaricom-red: #e31b23;
             --megapay-blue: #0d6efd; 
+            
+            /* Theme Colors (Dark Glass) */
             --bg-color: #0f172a;
             --card-bg: rgba(15, 23, 42, 0.6);
             --card-border: rgba(255, 255, 255, 0.08);
@@ -23,9 +25,17 @@
         }
 
         body {
-            margin: 0; padding: 0; font-family: 'Cause', sans-serif;
-            background-color: var(--bg-color); color: var(--text-main);
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cause', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            
+            /* "Busy" Background */
             background-image: 
                 radial-gradient(circle at top right, rgba(13, 110, 253, 0.15), transparent),
                 linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .01) 25%, rgba(255, 255, 255, .01) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .01) 75%, rgba(255, 255, 255, .01) 76%, transparent 77%, transparent),
@@ -34,24 +44,76 @@
             animation: backgroundMove 60s linear infinite;
         }
 
-        @keyframes backgroundMove { 0% { background-position: 0 0, 0 0, 0 0; } 100% { background-position: 0 0, 500px 1000px, 500px 1000px; } }
+        @keyframes backgroundMove {
+            0% { background-position: 0 0, 0 0, 0 0; }
+            100% { background-position: 0 0, 500px 1000px, 500px 1000px; }
+        }
+
         .hidden { display: none !important; }
         .success-text { color: var(--safaricom-green) !important; }
         .error-text { color: var(--safaricom-red) !important; }
 
-        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(5px); border-bottom: 1px solid var(--card-border); z-index: 10; }
+        /* --- Branded Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid var(--card-border);
+            z-index: 10;
+        }
+
         .logo-group { display: flex; align-items: center; gap: 15px; }
         .logo-group img { height: 40px; width: auto; object-fit: contain; max-width: 120px; }
         .divider { height: 25px; width: 1px; background: var(--card-border); }
-        .system-title { font-size: 14px; font-weight: bold; color: var(--text-muted); }
+        .system-title { font-size: 14px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; }
 
-        main { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; }
-        .glass-card { background: var(--card-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--card-border); border-radius: 20px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); position: relative; z-index: 1; }
+        /* --- Main Content Area --- */
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 20px;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            position: relative;
+            z-index: 1;
+        }
+
         h2 { margin-top: 0; margin-bottom: 25px; font-weight: 700; text-align: center; }
 
         .input-group { margin-bottom: 25px; }
         label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
-        input { width: 100%; padding: 16px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: white; font-size: 16px; font-weight: bold; letter-spacing: 1px; box-sizing: border-box; outline: none; transition: all 0.3s; font-family: 'Cause', sans-serif; }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s;
+            font-family: 'Cause', sans-serif;
+        }
         input:focus { border-color: var(--megapay-blue); box-shadow: 0 0 15px rgba(13, 110, 253, 0.3); }
         input[disabled] { opacity: 0.5; cursor: not-allowed; }
 
@@ -61,16 +123,25 @@
         #manualAmount:focus { border-color: var(--safaricom-green); box-shadow: 0 0 15px rgba(137, 197, 63, 0.3); }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-        button { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--megapay-blue), #0056b3); color: #ffffff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; font-family: 'Cause', sans-serif; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
+        button {
+            width: 100%; padding: 18px;
+            background: linear-gradient(135deg, var(--megapay-blue), #0056b3);
+            color: #ffffff; border: none; border-radius: 10px;
+            font-size: 16px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; cursor: pointer; transition: all 0.2s;
+            font-family: 'Cause', sans-serif; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
         button:active { transform: translateY(1px); }
         button:hover:not([disabled]) { box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4); }
         button[disabled] { opacity: 0.6; cursor: wait; }
 
+        /* --- Bottom Links --- */
         .bottom-links { display: flex; justify-content: space-between; margin-top: 25px; }
         .text-link { color: var(--text-muted); font-size: 12px; text-decoration: none; cursor: pointer; transition: color 0.2s; font-weight: bold; text-transform: uppercase; }
         .text-link:hover { color: #ffffff; }
         .logout-link:hover { color: var(--safaricom-red); }
 
+        /* --- Processing State --- */
         .processing-area { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 180px; }
         .mpesa-loader { position: relative; width: 60px; height: 60px; margin-bottom: 20px; }
         .mpesa-logo-static { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); height: 40px; width: auto; z-index: 2; }
@@ -80,6 +151,7 @@
         .waiting-text { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
         .sub-text { font-size: 13px; color: var(--text-muted); max-width: 250px; }
 
+        /* --- Success Overlay --- */
         #successOverlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: linear-gradient(to bottom, #0f172ab0, #0f172a); backdrop-filter: blur(25px); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
         .confetti-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
         .confetti { position: absolute; width: 10px; height: 10px; background: var(--safaricom-green); top: -10px; border-radius: 2px; animation: confettiFall linear infinite; }
@@ -99,7 +171,7 @@
         .done-btn-group { margin-top: 40px; width: 200px; }
         .done-btn { background: #ffffff; color: #000; }
 
-        /* --- NEW: Report View Styles --- */
+        /* --- Report View Styles --- */
         #reportView { max-width: 600px; width: 90%; }
         .report-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 1px solid var(--card-border); padding-bottom: 15px; }
         .report-header h2 { margin: 0; text-align: left; }
@@ -123,18 +195,22 @@
             <div class="divider"></div>
             <img src="megapay-logo.png" alt="Partner Logo">
         </div>
-        <div class="system-title">POS Integration v2.1</div>
+        <div class="system-title" id="branchTitle">SpeedyMart POS</div>
     </header>
     
     <main>
         <div id="bgDataLines"></div>
 
         <div class="glass-card" id="loginView">
-            <h2>Admin Access</h2>
+            <h2>Cashier Access</h2>
             <form id="loginForm">
                 <div class="input-group">
-                    <label for="adminPin">Secure Admin PIN</label>
-                    <input type="password" id="adminPin" placeholder="****" required maxlength="4">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="e.g., jane_thika" required autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="****" required>
                 </div>
                 <button type="submit" id="loginBtn">Unlock Terminal</button>
             </form>
@@ -144,6 +220,7 @@
         <div class="glass-card hidden" id="checkoutView">
             <div id="inputStateArea">
                 <h2>Point of Sale</h2>
+
                 <form id="paymentForm">
                     <div class="input-group amount-input-group">
                         <label for="manualAmount">Transaction Amount</label>
@@ -229,6 +306,14 @@
     </div>
 
     <script>
+        // --- DYNAMIC STORE NAMING ---
+        const currentPort = window.location.port;
+        if (currentPort === '3007') {
+            document.getElementById('branchTitle').innerText = 'Gatanga Branch POS';
+        } else if (currentPort === '3008') {
+            document.getElementById('branchTitle').innerText = 'Thika Branch POS';
+        }
+
         const SESSION_DURATION_MS = 12 * 60 * 60 * 1000; 
 
         const ui = {
@@ -239,7 +324,7 @@
             checkoutProcess: document.getElementById('processingStateArea'),
             overlay: document.getElementById('successOverlay'),
             forms: { login: document.getElementById('loginForm'), payment: document.getElementById('paymentForm') },
-            inputs: { pin: document.getElementById('adminPin'), phone: document.getElementById('phone'), amount: document.getElementById('manualAmount') },
+            inputs: { username: document.getElementById('username'), password: document.getElementById('password'), phone: document.getElementById('phone'), amount: document.getElementById('manualAmount') },
             btns: { login: document.getElementById('loginBtn'), payment: document.getElementById('submitBtn'), finish: document.getElementById('finishBtn'), logout: document.getElementById('logoutBtn'), viewReport: document.getElementById('viewReportBtn'), backToPos: document.getElementById('backToPosBtn') },
             displays: { successAmount: document.getElementById('successAmountDisplay'), receipt: document.getElementById('successReceiptId') },
             status: { login: document.getElementById('loginStatus'), input: document.getElementById('paymentInputStatus'), process: document.getElementById('paymentProcessStatus') }
@@ -307,7 +392,6 @@
             const tbody = document.getElementById('reportTableBody');
             tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Loading transactions...</td></tr>';
             
-            // Fetch today's transactions
             fetch('/api/transactions/today')
                 .then(res => res.json())
                 .then(data => {
@@ -321,7 +405,7 @@
 
                         tbody.innerHTML = '';
                         data.transactions.forEach(tx => {
-                            const timeStr = new Date(tx.time).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
+                            const timeStr = new Date(tx.created_at).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
                             const amountStr = Number(tx.amount).toLocaleString('en-KE', { minimumFractionDigits: 2 });
                             
                             tbody.innerHTML += `
@@ -364,26 +448,30 @@
             createConfetti();
         }
 
+        // --- NEW: USERNAME & PASSWORD LOGIN HANDLER ---
         ui.forms.login.addEventListener('submit', function(e) {
             e.preventDefault();
-            const pin = ui.inputs.pin.value;
+            const user = ui.inputs.username.value.trim();
+            const pass = ui.inputs.password.value;
+            
             ui.btns.login.innerText = "Verifying...";
             ui.btns.login.disabled = true;
             ui.status.login.innerHTML = "";
 
-            fetch('/api/verify-pin', {
+            fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pin: pin })
+                body: JSON.stringify({ username: user, password: pass })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     localStorage.setItem('megaPaySession', Date.now().toString());
-                    ui.inputs.pin.value = ''; 
+                    ui.inputs.username.value = ''; 
+                    ui.inputs.password.value = ''; 
                     showCheckout();
                 } else {
-                    ui.status.login.innerHTML = `<span class='error-text'>🔒 Invalid PIN.</span>`;
+                    ui.status.login.innerHTML = `<span class='error-text'>🔒 ${data.message}</span>`;
                 }
             })
             .catch(() => ui.status.login.innerHTML = "<span class='error-text'>🚫 Server Error.</span>")
@@ -457,10 +545,7 @@
             setTimeout(() => ui.overlay.classList.add('hidden'), 500); 
         });
 
-        // NEW: View Report Listener
         ui.btns.viewReport.addEventListener('click', showReport);
-        
-        // NEW: Back to POS Listener
         ui.btns.backToPos.addEventListener('click', showCheckout);
 
         ui.btns.logout.addEventListener('click', () => {
