@@ -206,7 +206,7 @@
             <form id="loginForm">
                 <div class="input-group">
                     <label for="username">Username</label>
-                    <input type="text" id="username" placeholder="e.g., jane_thika" required autocomplete="off">
+                    <input type="text" id="username" placeholder="e.g., jane" required autocomplete="off">
                 </div>
                 <div class="input-group">
                     <label for="password">Password</label>
@@ -309,9 +309,9 @@
         // --- DYNAMIC STORE NAMING ---
         const currentPort = window.location.port;
         if (currentPort === '3007') {
-            document.getElementById('branchTitle').innerText = 'Gatanga Branch POS';
+            document.getElementById('branchTitle').innerText = 'Gatunga Branch POS';
         } else if (currentPort === '3008') {
-            document.getElementById('branchTitle').innerText = 'Thika Branch POS';
+            document.getElementById('branchTitle').innerText = 'Marimanti Branch POS';
         }
 
         const SESSION_DURATION_MS = 12 * 60 * 60 * 1000; 
