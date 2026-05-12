@@ -23,6 +23,7 @@ db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, role TEXT, store_id TEXT)`);
     db.run(`CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, store_id TEXT, ref_id TEXT UNIQUE, receipt TEXT, phone TEXT, amount REAL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
 
+    // Creates a default admin ONLY if the database is completely empty
     db.get("SELECT * FROM users WHERE role = 'boss'", (err, row) => {
         if (!row) {
             const hash = bcrypt.hashSync('boss123', 10);
@@ -31,7 +32,7 @@ db.serialize(() => {
     });
 });
 
-// Rolling 7-Day Deletion (Runs every 12 hours)
+// Rolling 7-Day Deletion
 function deleteOldTransactions() {
     const sql = `DELETE FROM transactions WHERE created_at < datetime('now', '-7 days')`;
     db.run(sql, function(err) {
@@ -49,6 +50,18 @@ app.post('/api/admin/login', (req, res) => {
         if (err || !user) return res.status(401).json({ success: false, message: "Invalid credentials" });
         if (bcrypt.compareSync(password, user.password)) res.json({ success: true });
         else res.status(401).json({ success: false, message: "Invalid credentials" });
+    });
+});
+
+// NEW: Update Boss Username and Password
+app.put('/api/admin/settings', (req, res) => {
+    const { newUsername, newPassword } = req.body;
+    if (!newUsername || !newPassword) return res.status(400).json({ success: false, message: "Both fields required" });
+    
+    const hash = bcrypt.hashSync(newPassword, 10);
+    db.run("UPDATE users SET username = ?, password = ? WHERE role = 'boss'", [newUsername, hash], (err) => {
+        if (err) return res.status(500).json({ success: false, message: "Error updating credentials" });
+        res.json({ success: true, message: "Credentials updated! Logging out..." });
     });
 });
 
@@ -81,38 +94,18 @@ app.get('/api/admin/cashiers', (req, res) => {
         res.json({ success: true, cashiers: rows });
     });
 });
-// --- NEW: UNIFIED WEBHOOK BROADCASTER ---
-app.post('/api/megapay/unified-webhook', (req, res) => {
-    // 1. Acknowledge MegaPay immediately so they don't resend it
-    res.status(200).send("OK");
 
-    const payload = req.body;
-    console.log("📢 Unified Webhook Received! Broadcasting to branches...");
-
-    // 2. Forward the exact payload to all active branch ports locally
-    const branches = ['3007', '3008']; // Add future branches (3010, 3011) here!
-    
-    branches.forEach(port => {
-        axios.post(`http://localhost:${port}/api/megapay/webhook`, payload)
-            .catch(err => { 
-                // Silently ignore if a branch server happens to be offline
-            });
-    });
-});
-// NEW: Edit Existing Cashier
 app.put('/api/admin/cashiers/:id', (req, res) => {
     const { username, password, store_id } = req.body;
     const { id } = req.params;
 
     if (password && password.trim() !== "") {
-        // Boss changed the password
         const hash = bcrypt.hashSync(password, 10);
         db.run("UPDATE users SET username = ?, password = ?, store_id = ? WHERE id = ?", [username, hash, store_id, id], (err) => {
             if (err) return res.status(400).json({ success: false, message: "Error updating cashier" });
             res.json({ success: true, message: "Cashier updated with new password" });
         });
     } else {
-        // Boss only changed username or store (password remains same)
         db.run("UPDATE users SET username = ?, store_id = ? WHERE id = ?", [username, store_id, id], (err) => {
             if (err) return res.status(400).json({ success: false, message: "Error updating cashier" });
             res.json({ success: true, message: "Cashier details updated" });
@@ -120,11 +113,21 @@ app.put('/api/admin/cashiers/:id', (req, res) => {
     }
 });
 
-// NEW: Delete Cashier
 app.delete('/api/admin/cashiers/:id', (req, res) => {
     db.run("DELETE FROM users WHERE id = ?", [req.params.id], (err) => {
         if (err) return res.status(400).json({ success: false, message: "Error deleting cashier" });
         res.json({ success: true, message: "Cashier deleted" });
+    });
+});
+
+// UNIFIED WEBHOOK BROADCASTER
+app.post('/api/megapay/unified-webhook', (req, res) => {
+    res.status(200).send("OK");
+    const payload = req.body;
+    console.log("📢 Unified Webhook Received! Broadcasting to branches...");
+    const branches = ['3007', '3008']; 
+    branches.forEach(port => {
+        axios.post(`http://localhost:${port}/api/megapay/webhook`, payload).catch(err => {});
     });
 });
 

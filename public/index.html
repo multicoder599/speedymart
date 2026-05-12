@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpeedyMart Admin Panel</title>
+    <title>SpeedyMart Boss Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Cause:wght@100..900&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; font-family: 'Cause', sans-serif; background: #0f172a; color: #f8fafc; }
@@ -15,11 +15,10 @@
         button { padding: 12px 20px; background: #0d6efd; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-family: 'Cause'; }
         button:hover { background: #0b5ed7; }
         
-        .nav { display: flex; gap: 10px; margin-bottom: 20px; }
+        .nav { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;}
         .nav button { width: auto; background: #334155; }
         .nav button.active { background: #0d6efd; }
 
-        /* Day Selector Styles */
         .day-filters { display: flex; gap: 10px; margin-top: 15px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px;}
         .day-btn { background: #1e293b; border: 1px solid #334155; color: #94a3b8; width: auto; white-space: nowrap;}
         .day-btn.active { background: #89c53f; color: #000; border-color: #89c53f; }
@@ -30,8 +29,8 @@
         th, td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; }
         th { color: #94a3b8; }
         
-        .success { color: #89c53f; }
-        .error { color: #e31b23; }
+        .success { color: #89c53f; font-weight: bold; }
+        .error { color: #e31b23; font-weight: bold; }
         .btn-small { width: auto; padding: 6px 12px; font-size: 12px; margin-right: 5px; }
         .btn-danger { background: #e31b23; }
         .btn-danger:hover { background: #c8181f; }
@@ -44,7 +43,7 @@
 <body>
 
     <div id="loginView" class="container card">
-        <h2 style="text-align: center;">Super Admin Login</h2>
+        <h2 style="text-align: center;">Boss Login</h2>
         <input type="text" id="adminUser" placeholder="Username">
         <input type="password" id="adminPass" placeholder="Password">
         <button onclick="login()">Access System</button>
@@ -56,6 +55,7 @@
         <div class="nav">
             <button id="tabTx" class="active" onclick="switchTab('tx')">Transactions</button>
             <button id="tabCashiers" onclick="switchTab('cashiers')">Manage Cashiers</button>
+            <button id="tabSettings" onclick="switchTab('settings')">⚙️ Settings</button>
             <button style="background: #e31b23; margin-left: auto;" onclick="logout()">Logout</button>
         </div>
 
@@ -63,12 +63,10 @@
             <div class="card">
                 <h2>Branch & Day Filter</h2>
                 <select id="storeFilter" onchange="loadTransactions()">
-                    <option value="3007">Gatunga Branch</option>
-                    <option value="3008">Marimanti Branch</option>
+                    <option value="3007">Gatanga Branch</option>
+                    <option value="3008">Thika Branch</option>
                 </select>
-
-                <div class="day-filters" id="dayFilters">
-                    </div>
+                <div class="day-filters" id="dayFilters"></div>
             </div>
 
             <div class="card">
@@ -88,8 +86,8 @@
                     <input type="text" id="newUsername" placeholder="Username (e.g., jane_gatanga)">
                     <input type="password" id="newPassword" placeholder="Password (Leave blank if editing to keep old)">
                     <select id="newStore">
-                        <option value="3007">Gatunga Branch</option>
-                        <option value="3008">Marimanti Branch</option>
+                        <option value="3007">Gatanga Branch</option>
+                        <option value="3008">Thika Branch</option>
                     </select>
                     <button id="cashierSubmitBtn" style="width: 150px;" onclick="saveCashier()">Create</button>
                     <button id="cashierCancelBtn" class="hidden btn-danger" style="width: 100px;" onclick="resetCashierForm()">Cancel</button>
@@ -105,12 +103,28 @@
                 </table>
             </div>
         </div>
+
+        <div id="settingsArea" class="hidden">
+            <div class="card" style="max-width: 400px;">
+                <h2>Change Admin Login</h2>
+                <p style="color: #94a3b8; font-size: 14px;">Update your master username and password here. You will be logged out automatically after updating.</p>
+                
+                <label style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">New Boss Username</label>
+                <input type="text" id="newBossUser" placeholder="Enter new username">
+                
+                <label style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">New Boss Password</label>
+                <input type="password" id="newBossPass" placeholder="Enter new password">
+                
+                <button onclick="updateBossCredentials()" style="background: #f59e0b; margin-top: 10px;">Update Credentials</button>
+                <div id="settingsMsg" style="margin-top: 15px; text-align: center;"></div>
+            </div>
+        </div>
     </div>
 
     <script>
         let allTransactions = []; 
         let activeStore = '3007';
-        let activeDay = ''; // e.g., "Monday"
+        let activeDay = ''; 
 
         function login() {
             fetch('/api/admin/login', {
@@ -132,11 +146,40 @@
         function switchTab(tab) {
             document.getElementById('txArea').classList.toggle('hidden', tab !== 'tx');
             document.getElementById('cashierArea').classList.toggle('hidden', tab !== 'cashiers');
+            document.getElementById('settingsArea').classList.toggle('hidden', tab !== 'settings');
+            
             document.getElementById('tabTx').classList.toggle('active', tab === 'tx');
             document.getElementById('tabCashiers').classList.toggle('active', tab === 'cashiers');
+            document.getElementById('tabSettings').classList.toggle('active', tab === 'settings');
         }
 
-        // --- TRANSACTION LOGIC ---
+        // --- NEW: BOSS CREDENTIAL UPDATE ---
+        function updateBossCredentials() {
+            const newUsername = document.getElementById('newBossUser').value.trim();
+            const newPassword = document.getElementById('newBossPass').value;
+
+            if (!newUsername || !newPassword) {
+                document.getElementById('settingsMsg').innerHTML = `<span class="error">Please fill out both fields.</span>`;
+                return;
+            }
+
+            fetch('/api/admin/settings', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ newUsername: newUsername, newPassword: newPassword })
+            }).then(r => r.json()).then(data => {
+                const msg = document.getElementById('settingsMsg');
+                if (data.success) {
+                    msg.innerHTML = `<span class="success">${data.message}</span>`;
+                    setTimeout(() => logout(), 2500); // Kicks boss out after 2.5 seconds
+                } else {
+                    msg.innerHTML = `<span class="error">${data.message}</span>`;
+                }
+            }).catch(() => {
+                document.getElementById('settingsMsg').innerHTML = `<span class="error">Server error occurred.</span>`;
+            });
+        }
+
         function loadTransactions() {
             activeStore = document.getElementById('storeFilter').value;
             fetch(`/api/admin/transactions?store_id=${activeStore}`)
@@ -150,31 +193,24 @@
             const filterContainer = document.getElementById('dayFilters');
             filterContainer.innerHTML = '';
             
-            // Get unique days from the data that actually have transactions
             const uniqueDays = [...new Set(allTransactions.map(tx => {
                 return new Date(tx.created_at).toLocaleDateString('en-KE', {weekday: 'long', month: 'short', day: 'numeric'});
             }))];
 
             if(uniqueDays.length === 0) {
-                filterContainer.innerHTML = '<span style="color:gray;">No transactions found for this branch in the last 7 days.</span>';
+                filterContainer.innerHTML = '<span style="color:gray;">No transactions found.</span>';
                 document.getElementById('txTable').innerHTML = '';
                 document.getElementById('dayTotalDisplay').innerText = 'Total: Ksh 0.00';
                 return;
             }
 
-            // Set the active day to the most recent day if one isn't selected or if it switched branches
-            if(!uniqueDays.includes(activeDay)) {
-                activeDay = uniqueDays[0]; 
-            }
+            if(!uniqueDays.includes(activeDay)) activeDay = uniqueDays[0]; 
 
             uniqueDays.forEach(dayStr => {
                 const btn = document.createElement('button');
                 btn.className = `day-btn ${dayStr === activeDay ? 'active' : ''}`;
                 btn.innerText = dayStr;
-                btn.onclick = () => {
-                    activeDay = dayStr;
-                    generateDayFilters(); // re-render buttons to show active state
-                };
+                btn.onclick = () => { activeDay = dayStr; generateDayFilters(); };
                 filterContainer.appendChild(btn);
             });
 
@@ -185,12 +221,10 @@
             const tbody = document.getElementById('txTable');
             tbody.innerHTML = '';
             
-            // Filter transactions by the selected day string
             const dayTxs = allTransactions.filter(tx => {
                 return new Date(tx.created_at).toLocaleDateString('en-KE', {weekday: 'long', month: 'short', day: 'numeric'}) === activeDay;
             });
 
-            // Calculate Total
             const total = dayTxs.reduce((sum, tx) => sum + tx.amount, 0);
             document.getElementById('dayTotalDisplay').innerText = `${activeDay} Total: Ksh ${total.toLocaleString()}`;
 
@@ -205,13 +239,12 @@
             });
         }
 
-        // --- CASHIER LOGIC ---
         function loadCashiers() {
             fetch('/api/admin/cashiers').then(r=>r.json()).then(data => {
                 const tbody = document.getElementById('cashierTable');
                 tbody.innerHTML = '';
                 data.cashiers.forEach(c => {
-                    const storeName = c.store_id === '3007' ? 'Gatunga' : 'Marimanti';
+                    const storeName = c.store_id === '3007' ? 'Gatanga' : 'Thika';
                     tbody.innerHTML += `<tr>
                         <td>${c.username}</td>
                         <td>${storeName}</td>
@@ -234,25 +267,16 @@
 
             let url = '/api/admin/cashiers';
             let method = 'POST';
+            if (id) { url = `/api/admin/cashiers/${id}`; method = 'PUT'; }
 
-            if (id) {
-                url = `/api/admin/cashiers/${id}`;
-                method = 'PUT';
-            }
-
-            fetch(url, {
-                method: method,
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            }).then(r=>r.json()).then(data => {
+            fetch(url, { method: method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) })
+            .then(r=>r.json()).then(data => {
                 const msg = document.getElementById('cashierMsg');
                 if(data.success) {
                     msg.innerHTML = `<span class="success">${data.message}</span>`;
                     resetCashierForm();
                     loadCashiers();
-                } else {
-                    msg.innerHTML = `<span class="error">${data.message}</span>`;
-                }
+                } else msg.innerHTML = `<span class="error">${data.message}</span>`;
             });
         }
 
@@ -260,7 +284,7 @@
             document.getElementById('cashierFormTitle').innerText = "Edit Cashier Details";
             document.getElementById('editCashierId').value = id;
             document.getElementById('newUsername').value = username;
-            document.getElementById('newPassword').value = ''; // Leave blank so boss doesn't accidentally overwrite
+            document.getElementById('newPassword').value = ''; 
             document.getElementById('newStore').value = store_id;
             
             document.getElementById('cashierSubmitBtn').innerText = "Update";
@@ -270,8 +294,7 @@
 
         function deleteCashier(id, username) {
             if(confirm(`Are you sure you want to completely delete the cashier: ${username}?`)) {
-                fetch(`/api/admin/cashiers/${id}`, { method: 'DELETE' })
-                .then(r=>r.json()).then(data => {
+                fetch(`/api/admin/cashiers/${id}`, { method: 'DELETE' }).then(r=>r.json()).then(data => {
                     if(data.success) loadCashiers();
                 });
             }
