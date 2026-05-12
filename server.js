@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const axios = require('axios');
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 const path = require('path');
@@ -80,7 +81,24 @@ app.get('/api/admin/cashiers', (req, res) => {
         res.json({ success: true, cashiers: rows });
     });
 });
+// --- NEW: UNIFIED WEBHOOK BROADCASTER ---
+app.post('/api/megapay/unified-webhook', (req, res) => {
+    // 1. Acknowledge MegaPay immediately so they don't resend it
+    res.status(200).send("OK");
 
+    const payload = req.body;
+    console.log("📢 Unified Webhook Received! Broadcasting to branches...");
+
+    // 2. Forward the exact payload to all active branch ports locally
+    const branches = ['3007', '3008']; // Add future branches (3010, 3011) here!
+    
+    branches.forEach(port => {
+        axios.post(`http://localhost:${port}/api/megapay/webhook`, payload)
+            .catch(err => { 
+                // Silently ignore if a branch server happens to be offline
+            });
+    });
+});
 // NEW: Edit Existing Cashier
 app.put('/api/admin/cashiers/:id', (req, res) => {
     const { username, password, store_id } = req.body;
