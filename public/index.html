@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeedyMart Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cause:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; font-family: 'Cause', sans-serif; background: #0f172a; color: #f8fafc; }
+        .hidden { display: none !important; }
+        .container { padding: 40px; max-width: 1000px; margin: auto; }
+        
+        .card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 12px; margin-bottom: 20px;}
+        input, select { width: 100%; padding: 12px; margin: 10px 0; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-family: 'Cause'; box-sizing: border-box;}
+        button { padding: 12px 20px; background: #0d6efd; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-family: 'Cause'; }
+        button:hover { background: #0b5ed7; }
+        
+        .nav { display: flex; gap: 10px; margin-bottom: 20px; }
+        .nav button { width: auto; background: #334155; }
+        .nav button.active { background: #0d6efd; }
+
+        /* Day Selector Styles */
+        .day-filters { display: flex; gap: 10px; margin-top: 15px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px;}
+        .day-btn { background: #1e293b; border: 1px solid #334155; color: #94a3b8; width: auto; white-space: nowrap;}
+        .day-btn.active { background: #89c53f; color: #000; border-color: #89c53f; }
+
+        .total-display { font-size: 24px; font-weight: bold; color: #89c53f; margin-bottom: 15px; text-align: right;}
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; }
+        th { color: #94a3b8; }
+        
+        .success { color: #89c53f; }
+        .error { color: #e31b23; }
+        .btn-small { width: auto; padding: 6px 12px; font-size: 12px; margin-right: 5px; }
+        .btn-danger { background: #e31b23; }
+        .btn-danger:hover { background: #c8181f; }
+        .btn-edit { background: #f59e0b; }
+        .btn-edit:hover { background: #d97706; }
+        
+        #loginView { max-width: 400px; margin: 100px auto; }
+    </style>
+</head>
+<body>
+
+    <div id="loginView" class="container card">
+        <h2 style="text-align: center;">Super Admin Login</h2>
+        <input type="text" id="adminUser" placeholder="Username">
+        <input type="password" id="adminPass" placeholder="Password">
+        <button onclick="login()">Access System</button>
+        <div id="loginMsg" style="margin-top: 15px; text-align: center;"></div>
+    </div>
+
+    <div id="dashboardView" class="container hidden">
+        <h1>SpeedyMart Control Center</h1>
+        <div class="nav">
+            <button id="tabTx" class="active" onclick="switchTab('tx')">Transactions</button>
+            <button id="tabCashiers" onclick="switchTab('cashiers')">Manage Cashiers</button>
+            <button style="background: #e31b23; margin-left: auto;" onclick="logout()">Logout</button>
+        </div>
+
+        <div id="txArea">
+            <div class="card">
+                <h2>Branch & Day Filter</h2>
+                <select id="storeFilter" onchange="loadTransactions()">
+                    <option value="3007">Gatunga Branch</option>
+                    <option value="3008">Marimanti Branch</option>
+                </select>
+
+                <div class="day-filters" id="dayFilters">
+                    </div>
+            </div>
+
+            <div class="card">
+                <div class="total-display" id="dayTotalDisplay">Total: Ksh 0.00</div>
+                <table>
+                    <thead><tr><th>Time</th><th>Receipt</th><th>Phone</th><th>Amount</th></tr></thead>
+                    <tbody id="txTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="cashierArea" class="hidden">
+            <div class="card" id="cashierFormCard">
+                <h2 id="cashierFormTitle">Create New Cashier</h2>
+                <input type="hidden" id="editCashierId">
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="newUsername" placeholder="Username (e.g., jane_gatanga)">
+                    <input type="password" id="newPassword" placeholder="Password (Leave blank if editing to keep old)">
+                    <select id="newStore">
+                        <option value="3007">Gatunga Branch</option>
+                        <option value="3008">Marimanti Branch</option>
+                    </select>
+                    <button id="cashierSubmitBtn" style="width: 150px;" onclick="saveCashier()">Create</button>
+                    <button id="cashierCancelBtn" class="hidden btn-danger" style="width: 100px;" onclick="resetCashierForm()">Cancel</button>
+                </div>
+                <div id="cashierMsg" style="margin-top: 10px;"></div>
+            </div>
+
+            <div class="card">
+                <h2>Active Cashiers</h2>
+                <table>
+                    <thead><tr><th>Username</th><th>Assigned Store</th><th>Actions</th></tr></thead>
+                    <tbody id="cashierTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allTransactions = []; 
+        let activeStore = '3007';
+        let activeDay = ''; // e.g., "Monday"
+
+        function login() {
+            fetch('/api/admin/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username: adminUser.value, password: adminPass.value})
+            }).then(r=>r.json()).then(data => {
+                if(data.success) {
+                    document.getElementById('loginView').classList.add('hidden');
+                    document.getElementById('dashboardView').classList.remove('hidden');
+                    loadTransactions();
+                    loadCashiers();
+                } else {
+                    document.getElementById('loginMsg').innerHTML = `<span class="error">Invalid login</span>`;
+                }
+            });
+        }
+
+        function switchTab(tab) {
+            document.getElementById('txArea').classList.toggle('hidden', tab !== 'tx');
+            document.getElementById('cashierArea').classList.toggle('hidden', tab !== 'cashiers');
+            document.getElementById('tabTx').classList.toggle('active', tab === 'tx');
+            document.getElementById('tabCashiers').classList.toggle('active', tab === 'cashiers');
+        }
+
+        // --- TRANSACTION LOGIC ---
+        function loadTransactions() {
+            activeStore = document.getElementById('storeFilter').value;
+            fetch(`/api/admin/transactions?store_id=${activeStore}`)
+                .then(r=>r.json()).then(data => {
+                    allTransactions = data.transactions;
+                    generateDayFilters();
+                });
+        }
+
+        function generateDayFilters() {
+            const filterContainer = document.getElementById('dayFilters');
+            filterContainer.innerHTML = '';
+            
+            // Get unique days from the data that actually have transactions
+            const uniqueDays = [...new Set(allTransactions.map(tx => {
+                return new Date(tx.created_at).toLocaleDateString('en-KE', {weekday: 'long', month: 'short', day: 'numeric'});
+            }))];
+
+            if(uniqueDays.length === 0) {
+                filterContainer.innerHTML = '<span style="color:gray;">No transactions found for this branch in the last 7 days.</span>';
+                document.getElementById('txTable').innerHTML = '';
+                document.getElementById('dayTotalDisplay').innerText = 'Total: Ksh 0.00';
+                return;
+            }
+
+            // Set the active day to the most recent day if one isn't selected or if it switched branches
+            if(!uniqueDays.includes(activeDay)) {
+                activeDay = uniqueDays[0]; 
+            }
+
+            uniqueDays.forEach(dayStr => {
+                const btn = document.createElement('button');
+                btn.className = `day-btn ${dayStr === activeDay ? 'active' : ''}`;
+                btn.innerText = dayStr;
+                btn.onclick = () => {
+                    activeDay = dayStr;
+                    generateDayFilters(); // re-render buttons to show active state
+                };
+                filterContainer.appendChild(btn);
+            });
+
+            renderTransactionTable();
+        }
+
+        function renderTransactionTable() {
+            const tbody = document.getElementById('txTable');
+            tbody.innerHTML = '';
+            
+            // Filter transactions by the selected day string
+            const dayTxs = allTransactions.filter(tx => {
+                return new Date(tx.created_at).toLocaleDateString('en-KE', {weekday: 'long', month: 'short', day: 'numeric'}) === activeDay;
+            });
+
+            // Calculate Total
+            const total = dayTxs.reduce((sum, tx) => sum + tx.amount, 0);
+            document.getElementById('dayTotalDisplay').innerText = `${activeDay} Total: Ksh ${total.toLocaleString()}`;
+
+            dayTxs.forEach(tx => {
+                const timeStr = new Date(tx.created_at).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
+                tbody.innerHTML += `<tr>
+                    <td>${timeStr}</td>
+                    <td style="font-family: monospace;">${tx.receipt}</td>
+                    <td>${tx.phone}</td>
+                    <td class="success">Ksh ${tx.amount}</td>
+                </tr>`;
+            });
+        }
+
+        // --- CASHIER LOGIC ---
+        function loadCashiers() {
+            fetch('/api/admin/cashiers').then(r=>r.json()).then(data => {
+                const tbody = document.getElementById('cashierTable');
+                tbody.innerHTML = '';
+                data.cashiers.forEach(c => {
+                    const storeName = c.store_id === '3007' ? 'Gatunga' : 'Marimanti';
+                    tbody.innerHTML += `<tr>
+                        <td>${c.username}</td>
+                        <td>${storeName}</td>
+                        <td>
+                            <button class="btn-small btn-edit" onclick="editCashier(${c.id}, '${c.username}', '${c.store_id}')">Edit</button>
+                            <button class="btn-small btn-danger" onclick="deleteCashier(${c.id}, '${c.username}')">Delete</button>
+                        </td>
+                    </tr>`;
+                });
+            });
+        }
+
+        function saveCashier() {
+            const id = document.getElementById('editCashierId').value;
+            const payload = {
+                username: document.getElementById('newUsername').value,
+                password: document.getElementById('newPassword').value,
+                store_id: document.getElementById('newStore').value
+            };
+
+            let url = '/api/admin/cashiers';
+            let method = 'POST';
+
+            if (id) {
+                url = `/api/admin/cashiers/${id}`;
+                method = 'PUT';
+            }
+
+            fetch(url, {
+                method: method,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            }).then(r=>r.json()).then(data => {
+                const msg = document.getElementById('cashierMsg');
+                if(data.success) {
+                    msg.innerHTML = `<span class="success">${data.message}</span>`;
+                    resetCashierForm();
+                    loadCashiers();
+                } else {
+                    msg.innerHTML = `<span class="error">${data.message}</span>`;
+                }
+            });
+        }
+
+        function editCashier(id, username, store_id) {
+            document.getElementById('cashierFormTitle').innerText = "Edit Cashier Details";
+            document.getElementById('editCashierId').value = id;
+            document.getElementById('newUsername').value = username;
+            document.getElementById('newPassword').value = ''; // Leave blank so boss doesn't accidentally overwrite
+            document.getElementById('newStore').value = store_id;
+            
+            document.getElementById('cashierSubmitBtn').innerText = "Update";
+            document.getElementById('cashierCancelBtn').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function deleteCashier(id, username) {
+            if(confirm(`Are you sure you want to completely delete the cashier: ${username}?`)) {
+                fetch(`/api/admin/cashiers/${id}`, { method: 'DELETE' })
+                .then(r=>r.json()).then(data => {
+                    if(data.success) loadCashiers();
+                });
+            }
+        }
+
+        function resetCashierForm() {
+            document.getElementById('cashierFormTitle').innerText = "Create New Cashier";
+            document.getElementById('editCashierId').value = '';
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('newStore').value = '3007';
+            document.getElementById('cashierSubmitBtn').innerText = "Create";
+            document.getElementById('cashierCancelBtn').classList.add('hidden');
+        }
+
+        function logout() { location.reload(); }
+    </script>
+</body>
+</html>
