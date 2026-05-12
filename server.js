@@ -2,159 +2,120 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const sqlite3 = require('sqlite3').verbose();
+const bcrypt = require('bcryptjs');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const STORE_ID = PORT.toString(); // We use the Port (3007 or 3008) as the unique Store ID
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public')); 
 
-// Store pending transactions temporarily in memory
-const pendingTransactions = new Map();
-
-// --- NEW: Store completed transactions for the daily report ---
-const completedTransactions = [];
-
-// Array to hold active browser connections for SSE
-let connectedClients = [];
-
-// --- ADMIN LOGIN ENDPOINT ---
-app.post('/api/verify-pin', (req, res) => {
-    const { pin } = req.body;
-
-    if (pin === process.env.ADMIN_PIN) {
-        return res.status(200).json({ success: true, message: "Authentication successful." });
-    } else {
-        return res.status(401).json({ success: false, message: "Invalid PIN." });
-    }
+// --- CONNECT TO SHARED DATABASE ---
+// This assumes your admin folder is named 'speedymart-admin' and is right next to this folder
+const dbPath = path.resolve(__dirname, '../speedymart-admin/database.sqlite');
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) console.error("Database connection error. Check path:", err);
+    else console.log(`✅ Connected to Central Database as Store ID: ${STORE_ID}`);
 });
 
-// --- 1. INITIATE PAYMENT ENDPOINT ---
+const pendingTransactions = new Map();
+let connectedClients = [];
+
+// --- 1. NEW CASHIER LOGIN ENDPOINT ---
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+    
+    // Look up the cashier for THIS specific store
+    db.get("SELECT * FROM users WHERE username = ? AND store_id = ?", [username, STORE_ID], (err, user) => {
+        if (err || !user) {
+            return res.status(401).json({ success: false, message: "Invalid username or you are not assigned to this branch." });
+        }
+        
+        if (bcrypt.compareSync(password, user.password)) {
+            return res.status(200).json({ success: true, message: "Authentication successful." });
+        } else {
+            return res.status(401).json({ success: false, message: "Invalid password." });
+        }
+    });
+});
+
+// --- 2. INITIATE PAYMENT ENDPOINT (Unchanged) ---
 app.post('/api/initiate-payment', async (req, res) => {
     const { amount, phoneNumber } = req.body;
-
-    if (!amount || !phoneNumber) {
-        return res.status(400).json({ success: false, message: "Amount and Phone Number are required." });
-    }
+    if (!amount || !phoneNumber) return res.status(400).json({ success: false, message: "Amount and Phone Number are required." });
 
     let formattedPhone = phoneNumber.replace(/\s+/g, '');
     if (formattedPhone.startsWith('0')) formattedPhone = '254' + formattedPhone.substring(1);
     else if (formattedPhone.startsWith('+')) formattedPhone = formattedPhone.substring(1);
 
     const reference = `POS-${Date.now()}`;
-
-    // Exact payload structure from your snippet
     const payload = {
         api_key:      process.env.MEGAPAY_API_KEY,
         email:        process.env.MEGAPAY_EMAIL,
         amount:       amount,
         msisdn:       formattedPhone,
         callback_url: `${process.env.APP_URL}/api/megapay/webhook`,
-        description:  'PrimePOS Supermarket Checkout',
+        description:  `Supermarket ${STORE_ID} Checkout`,
         reference:    reference
     };
 
     try {
-        const mpRes = await axios.post(
-            'https://megapay.co.ke/backend/v1/initiatestk',
-            payload,
-            {
-                headers: { 'Content-Type': 'application/json' },
-                timeout: 15000
-            }
-        );
-
+        const mpRes = await axios.post('https://megapay.co.ke/backend/v1/initiatestk', payload, { headers: { 'Content-Type': 'application/json' }, timeout: 15000 });
         const mpData = mpRes.data;
-        console.log('MegaPay response:', JSON.stringify(mpData));
 
         if (mpData && (mpData.status === false || mpData.success === false || mpData.ResponseCode === '1')) {
-            return res.status(400).json({
-                success: false,
-                message: mpData.errorMessage || mpData.message || 'MegaPay rejected the request.'
-            });
+            return res.status(400).json({ success: false, message: mpData.errorMessage || mpData.message || 'MegaPay rejected the request.' });
         }
 
-        // Save reference to track it when the webhook hits
         pendingTransactions.set(reference, { status: 'Pending', amount, phone: formattedPhone });
-
-        return res.status(200).json({
-            success: true,
-            message: 'STK Push sent! Waiting for customer PIN.',
-            refId: reference
-        });
+        return res.status(200).json({ success: true, message: 'STK Push sent! Waiting for customer PIN.', refId: reference });
 
     } catch (mpErr) {
-        console.error('MegaPay STK error:', mpErr.message);
-        return res.status(502).json({
-            success: false,
-            message: 'Payment gateway failed to send STK push.'
-        });
+        return res.status(502).json({ success: false, message: 'Payment gateway failed to send STK push.' });
     }
 });
 
-// --- LIVE STATUS ENDPOINT (SSE) ---
-// The frontend connects here and waits for the webhook signal
 app.get('/api/stream-payment/:refId', (req, res) => {
     const { refId } = req.params;
-
-    // Headers to keep connection open
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
-
     const client = { refId, res };
     connectedClients.push(client);
-
-    // Remove client if they close the tab
-    req.on('close', () => {
-        connectedClients = connectedClients.filter(c => c !== client);
-    });
+    req.on('close', () => { connectedClients = connectedClients.filter(c => c !== client); });
 });
 
-// --- 2. MEGAPAY WEBHOOK ENDPOINT ---
+// --- 3. MEGAPAY WEBHOOK (Updated to save to DB) ---
 app.post('/api/megapay/webhook', async (req, res) => {
-    // Acknowledge receipt immediately so MegaPay doesn't resend
     res.status(200).send("OK");
-    
     const data = req.body;
-    console.log("Webhook Received:", JSON.stringify(data));
 
     try {
-        if ((data.ResponseCode !== undefined ? data.ResponseCode : data.ResultCode) != 0) {
-            console.log("Failed transaction webhook received.");
-            return;
-        }
+        if ((data.ResponseCode !== undefined ? data.ResponseCode : data.ResultCode) != 0) return;
 
         const amount = parseFloat(data.TransactionAmount || data.amount || data.Amount);
         const receipt = data.TransactionReceipt || data.MpesaReceiptNumber;
-        
-        // Grab the last 9 digits of the phone number to match it securely
         const last9 = (data.Msisdn || data.phone || data.PhoneNumber || "").toString().replace(/\D/g, '').slice(-9);
         
-        console.log(`✅ SUCCESSFUL POS PAYMENT: KES ${amount} | Receipt: ${receipt} | Phone: ${last9}`);
-
-        // 1. Find the matching pending transaction
         let matchedRefId = null;
         for (let [refId, tx] of pendingTransactions.entries()) {
             if (tx.phone.endsWith(last9) && tx.amount == amount && tx.status === 'Pending') {
                 tx.status = 'Paid';
                 matchedRefId = refId;
                 
-                // --- NEW: Save to completed transactions list for EOD Report ---
-                completedTransactions.push({
-                    receipt: receipt,
-                    amount: amount,
-                    phone: tx.phone,
-                    time: new Date().toISOString()
-                });
-                // ---------------------------------------------------------------
-                
+                // --- NEW: Insert permanently into Shared SQLite Database ---
+                db.run(`INSERT INTO transactions (store_id, ref_id, receipt, phone, amount) VALUES (?, ?, ?, ?, ?)`,
+                    [STORE_ID, refId, receipt, tx.phone, amount]
+                );
+                // ----------------------------------------------------------
                 break;
             }
         }
 
-        // 2. If matched, push the success message to the specific frontend tab waiting for it
         if (matchedRefId) {
             connectedClients.forEach(client => {
                 if (client.refId === matchedRefId) {
@@ -162,32 +123,26 @@ app.post('/api/megapay/webhook', async (req, res) => {
                 }
             });
         }
-
     } catch (err) {
         console.error('Webhook processing error:', err);
     }
 });
 
-// --- 3. DAILY REPORT ENDPOINT ---
+// --- 4. DAILY REPORT (Updated to read from DB) ---
 app.get('/api/transactions/today', (req, res) => {
-    // Get today's date in YYYY-MM-DD format based on Kenyan Time
-    const today = new Date().toLocaleString("en-US", {timeZone: "Africa/Nairobi"});
-    const todayDateString = new Date(today).toISOString().split('T')[0];
-
-    // Filter transactions that happened today
-    const todaysTx = completedTransactions.filter(tx => tx.time.startsWith(todayDateString));
+    // Queries the DB for transactions matching this store ID from today (adjusted for Kenyan UTC+3 timezone)
+    const sql = `
+        SELECT * FROM transactions 
+        WHERE store_id = ? 
+        AND date(created_at, '+3 hours') = date('now', '+3 hours') 
+        ORDER BY created_at DESC
+    `;
     
-    // Calculate total
-    const totalAmount = todaysTx.reduce((sum, tx) => sum + tx.amount, 0);
-
-    res.status(200).json({
-        success: true,
-        total: totalAmount,
-        count: todaysTx.length,
-        transactions: todaysTx.reverse() // Reverse so newest is at the top
+    db.all(sql, [STORE_ID], (err, rows) => {
+        if (err) return res.status(500).json({ success: false });
+        const totalAmount = rows.reduce((sum, tx) => sum + tx.amount, 0);
+        res.status(200).json({ success: true, total: totalAmount, count: rows.length, transactions: rows });
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`🚀 MegaPay Backend running on port ${PORT}`);
-});
+app.listen(PORT, () => { console.log(`🚀 POS Backend running on port ${PORT} (Store: ${STORE_ID})`); });
