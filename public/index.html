@@ -4,71 +4,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpeedyMart POS Terminal</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cause:wght@100..900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
     <style>
         :root {
             /* Brand Colors */
             --safaricom-green: #89c53f;
+            --safaricom-green-glow: rgba(137, 197, 63, 0.25);
             --safaricom-red: #e31b23;
-            --megapay-blue: #0d6efd; 
-            
+            --megapay-blue: #0d6efd;
+            --megapay-blue-glow: rgba(13, 110, 253, 0.25);
+
             /* Theme Colors (Dark Glass) */
-            --bg-color: #0f172a;
-            --card-bg: rgba(15, 23, 42, 0.6);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --bg-color: #0a0f1c;
+            --bg-elevated: #111827;
+            --card-bg: rgba(17, 24, 39, 0.55);
+            --card-bg-hover: rgba(17, 24, 39, 0.7);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --card-border-hover: rgba(255, 255, 255, 0.12);
+            --text-main: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --text-dim: #475569;
+
+            /* Spacing */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -2px rgba(0,0,0,0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -4px rgba(0,0,0,0.3);
+            --shadow-glow-green: 0 0 20px rgba(137, 197, 63, 0.15);
+            --shadow-glow-blue: 0 0 20px rgba(13, 110, 253, 0.15);
         }
+
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Cause', sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            
-            /* "Busy" Background */
+
+            /* Refined "Busy" Background */
             background-image: 
-                radial-gradient(circle at top right, rgba(13, 110, 253, 0.15), transparent),
-                linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .01) 25%, rgba(255, 255, 255, .01) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .01) 75%, rgba(255, 255, 255, .01) 76%, transparent 77%, transparent),
-                linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .01) 25%, rgba(255, 255, 255, .01) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .01) 75%, rgba(255, 255, 255, .01) 76%, transparent 77%, transparent);
-            background-size: 100% 100%, 50px 50px, 50px 50px;
-            animation: backgroundMove 60s linear infinite;
+                radial-gradient(ellipse at 20% 0%, rgba(13, 110, 253, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, rgba(137, 197, 63, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(13, 110, 253, 0.03) 0%, transparent 70%),
+                linear-gradient(0deg, transparent 24%, rgba(255,255,255,0.015) 25%, rgba(255,255,255,0.015) 26%, transparent 27%, transparent 74%, rgba(255,255,255,0.015) 75%, rgba(255,255,255,0.015) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(255,255,255,0.015) 25%, rgba(255,255,255,0.015) 26%, transparent 27%, transparent 74%, rgba(255,255,255,0.015) 75%, rgba(255,255,255,0.015) 76%, transparent 77%, transparent);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 60px 60px, 60px 60px;
+            animation: backgroundMove 80s linear infinite;
         }
 
         @keyframes backgroundMove {
-            0% { background-position: 0 0, 0 0, 0 0; }
-            100% { background-position: 0 0, 500px 1000px, 500px 1000px; }
+            0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; }
+            100% { background-position: 0 0, 0 0, 0 0, 600px 1200px, 600px 1200px; }
         }
 
         .hidden { display: none !important; }
         .success-text { color: var(--safaricom-green) !important; }
         .error-text { color: var(--safaricom-red) !important; }
 
+        /* Material Symbols Setup */
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 20px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+            vertical-align: middle;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-sm { font-size: 16px; }
+        .icon-md { font-size: 20px; }
+        .icon-lg { font-size: 24px; }
+        .icon-xl { font-size: 32px; }
+
         /* --- Branded Header --- */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 30px;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(5px);
+            padding: 12px 24px;
+            background: rgba(10, 15, 28, 0.85);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
             border-bottom: 1px solid var(--card-border);
             z-index: 10;
+            box-shadow: var(--shadow-sm);
         }
 
-        .logo-group { display: flex; align-items: center; gap: 15px; }
-        .logo-group img { height: 40px; width: auto; object-fit: contain; max-width: 120px; }
-        .divider { height: 25px; width: 1px; background: var(--card-border); }
-        .system-title { font-size: 14px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; }
+        .logo-group { display: flex; align-items: center; gap: 12px; }
+        .logo-group img { height: 36px; width: auto; object-fit: contain; max-width: 110px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+        .divider { height: 22px; width: 1px; background: var(--card-border-hover); }
+        .system-title { 
+            font-size: 13px; 
+            font-weight: 700; 
+            color: var(--text-muted); 
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-family: 'JetBrains Mono', monospace;
+        }
 
         /* --- Main Content Area --- */
         main {
@@ -82,110 +139,426 @@
 
         .glass-card {
             background: var(--card-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
             border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 40px;
+            border-radius: var(--radius-xl);
+            padding: 36px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            max-width: 420px;
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.02);
             position: relative;
             z-index: 1;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: var(--card-border-hover);
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.04);
         }
 
-        h2 { margin-top: 0; margin-bottom: 25px; font-weight: 700; text-align: center; }
+        h2 { 
+            margin-top: 0; 
+            margin-bottom: 28px; 
+            font-weight: 800; 
+            text-align: center; 
+            font-size: 22px;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+        }
 
-        .input-group { margin-bottom: 25px; }
-        label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+        .input-group { margin-bottom: 22px; }
+        label { 
+            display: flex; 
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px; 
+            color: var(--text-muted); 
+            font-size: 11px; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            letter-spacing: 1.2px; 
+        }
 
         input {
             width: 100%;
-            padding: 16px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            letter-spacing: 1px;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-md);
+            color: var(--text-main);
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
             box-sizing: border-box;
             outline: none;
-            transition: all 0.3s;
-            font-family: 'Cause', sans-serif;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        input:focus { border-color: var(--megapay-blue); box-shadow: 0 0 15px rgba(13, 110, 253, 0.3); }
-        input[disabled] { opacity: 0.5; cursor: not-allowed; }
+        input::placeholder { color: var(--text-dim); font-weight: 400; }
+        input:focus { 
+            border-color: var(--megapay-blue); 
+            box-shadow: 0 0 0 3px var(--megapay-blue-glow), inset 0 1px 2px rgba(0,0,0,0.2);
+            background: rgba(0, 0, 0, 0.45);
+        }
+        input[disabled] { opacity: 0.4; cursor: not-allowed; }
+        input:hover:not([disabled]):not(:focus) { border-color: rgba(255,255,255,0.15); }
 
         .currency-wrapper { position: relative; display: flex; align-items: center; }
-        .currency-symbol { position: absolute; left: 15px; color: var(--safaricom-green); font-weight: 800; font-size: 20px; z-index: 2; }
-        #manualAmount { padding-left: 65px; font-size: 28px; height: 65px; color: var(--safaricom-green); text-align: left; border-color: rgba(137, 197, 63, 0.3); }
-        #manualAmount:focus { border-color: var(--safaricom-green); box-shadow: 0 0 15px rgba(137, 197, 63, 0.3); }
+        .currency-symbol { 
+            position: absolute; 
+            left: 16px; 
+            color: var(--safaricom-green); 
+            font-weight: 700; 
+            font-size: 18px; 
+            z-index: 2;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        #manualAmount { 
+            padding-left: 60px; 
+            font-size: 26px; 
+            height: 60px; 
+            color: var(--safaricom-green); 
+            text-align: left; 
+            border-color: rgba(137, 197, 63, 0.25);
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.5px;
+        }
+        #manualAmount:focus { 
+            border-color: var(--safaricom-green); 
+            box-shadow: 0 0 0 3px var(--safaricom-green-glow), inset 0 1px 2px rgba(0,0,0,0.2);
+        }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
         button {
-            width: 100%; padding: 18px;
+            width: 100%; 
+            padding: 16px;
             background: linear-gradient(135deg, var(--megapay-blue), #0056b3);
-            color: #ffffff; border: none; border-radius: 10px;
-            font-size: 16px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 1px; cursor: pointer; transition: all 0.2s;
-            font-family: 'Cause', sans-serif; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            color: #ffffff; 
+            border: none; 
+            border-radius: var(--radius-md);
+            font-size: 14px; 
+            font-weight: 700; 
+            text-transform: uppercase;
+            letter-spacing: 1.5px; 
+            cursor: pointer; 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            box-shadow: var(--shadow-md), 0 0 0 1px rgba(255,255,255,0.05) inset;
+            position: relative;
+            overflow: hidden;
         }
-        button:active { transform: translateY(1px); }
-        button:hover:not([disabled]) { box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4); }
-        button[disabled] { opacity: 0.6; cursor: wait; }
+        button::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        button:hover:not([disabled])::after { left: 100%; }
+        button:active { transform: translateY(1px) scale(0.995); }
+        button:hover:not([disabled]) { 
+            box-shadow: var(--shadow-lg), 0 0 20px var(--megapay-blue-glow), 0 0 0 1px rgba(255,255,255,0.05) inset;
+            transform: translateY(-1px);
+        }
+        button[disabled] { opacity: 0.5; cursor: wait; }
 
         /* --- Bottom Links --- */
-        .bottom-links { display: flex; justify-content: space-between; margin-top: 25px; }
-        .text-link { color: var(--text-muted); font-size: 12px; text-decoration: none; cursor: pointer; transition: color 0.2s; font-weight: bold; text-transform: uppercase; }
-        .text-link:hover { color: #ffffff; }
-        .logout-link:hover { color: var(--safaricom-red); }
+        .bottom-links { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--card-border);
+        }
+        .text-link { 
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted); 
+            font-size: 12px; 
+            text-decoration: none; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            font-weight: 600; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+        }
+        .text-link:hover { 
+            color: var(--text-main); 
+            background: rgba(255,255,255,0.05);
+        }
+        .text-link .material-symbols-outlined { font-size: 16px; }
+        .logout-link:hover { color: var(--safaricom-red); background: rgba(227, 27, 35, 0.08); }
 
         /* --- Processing State --- */
-        .processing-area { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 180px; }
-        .mpesa-loader { position: relative; width: 60px; height: 60px; margin-bottom: 20px; }
-        .mpesa-logo-static { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); height: 40px; width: auto; z-index: 2; }
-        .pulse-ring { border: 3px solid var(--safaricom-green); border-radius: 50%; height: 100%; width: 100%; position: absolute; left: 0; top: 0; animation: pulse 1.5s ease-out infinite; opacity: 0; box-sizing: border-box; }
-        .pulse-ring:nth-child(2) { animation-delay: 0.5s; }
-        @keyframes pulse { 0% { transform: scale(0.6); opacity: 0; } 50% { opacity: 0.8; } 100% { transform: scale(1.2); opacity: 0; } }
-        .waiting-text { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
-        .sub-text { font-size: 13px; color: var(--text-muted); max-width: 250px; }
+        .processing-area { 
+            text-align: center; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 200px; 
+            padding: 20px 0;
+        }
+        .mpesa-loader { position: relative; width: 70px; height: 70px; margin-bottom: 24px; }
+        .mpesa-logo-static { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); height: 42px; width: auto; z-index: 2; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)); }
+        .pulse-ring { 
+            border: 2.5px solid var(--safaricom-green); 
+            border-radius: 50%; 
+            height: 100%; 
+            width: 100%; 
+            position: absolute; 
+            left: 0; top: 0; 
+            animation: pulse 1.8s ease-out infinite; 
+            opacity: 0; 
+            box-sizing: border-box; 
+        }
+        .pulse-ring:nth-child(2) { animation-delay: 0.6s; }
+        .pulse-ring:nth-child(3) { animation-delay: 1.2s; }
+        @keyframes pulse { 
+            0% { transform: scale(0.5); opacity: 0; } 
+            30% { opacity: 0.6; } 
+            100% { transform: scale(1.3); opacity: 0; } 
+        }
+        .waiting-text { 
+            font-weight: 800; 
+            font-size: 16px; 
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+        .sub-text { 
+            font-size: 13px; 
+            color: var(--text-muted); 
+            max-width: 260px;
+            line-height: 1.5;
+        }
 
         /* --- Success Overlay --- */
-        #successOverlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: linear-gradient(to bottom, #0f172ab0, #0f172a); backdrop-filter: blur(25px); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
-        .confetti-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
-        .confetti { position: absolute; width: 10px; height: 10px; background: var(--safaricom-green); top: -10px; border-radius: 2px; animation: confettiFall linear infinite; }
-        @keyframes confettiFall { to { transform: translateY(105vh) rotate(720deg); } }
-        .check-container { width: 150px; height: 150px; position: relative; margin-bottom: 40px; }
-        .check-background { width: 100%; height: 100%; border-radius: 50%; background: var(--safaricom-green); scale: 0; animation: popIn 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; animation-delay: 0.3s; box-shadow: 0 10px 40px rgba(137, 197, 63, 0.5); }
-        .check-svg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; }
-        .check-polyline { fill: none; stroke: white; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 200; stroke-dashoffset: 200; animation: drawCheck 0.5s ease-out forwards; animation-delay: 0.8s; }
-        @keyframes popIn { to { scale: 1; } } @keyframes drawCheck { to { stroke-dashoffset: 0; } }
-        .success-details { text-align: center; opacity: 0; transform: translateY(20px); animation: slideUp 0.5s forwards; animation-delay: 1.3s; }
+        #successOverlay { 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100vw; height: 100vh; 
+            background: linear-gradient(to bottom, rgba(10,15,28,0.92), rgba(10,15,28,0.98)); 
+            backdrop-filter: blur(30px) saturate(150%); 
+            z-index: 100; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .confetti-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
+        .confetti { 
+            position: absolute; 
+            width: 8px; height: 8px; 
+            background: var(--safaricom-green); 
+            top: -10px; 
+            border-radius: 2px; 
+            animation: confettiFall linear infinite; 
+            opacity: 0.8;
+        }
+        @keyframes confettiFall { 
+            to { transform: translateY(105vh) rotate(1080deg); } 
+        }
+        .check-container { 
+            width: 140px; height: 140px; 
+            position: relative; 
+            margin-bottom: 36px; 
+        }
+        .check-background { 
+            width: 100%; height: 100%; 
+            border-radius: 50%; 
+            background: linear-gradient(135deg, var(--safaricom-green), #6ba32e); 
+            scale: 0; 
+            animation: popIn 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; 
+            animation-delay: 0.3s; 
+            box-shadow: 0 10px 40px rgba(137, 197, 63, 0.4), 0 0 0 8px rgba(137, 197, 63, 0.1); 
+        }
+        .check-svg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70px; height: 70px; }
+        .check-polyline { 
+            fill: none; 
+            stroke: white; 
+            stroke-width: 10; 
+            stroke-linecap: round; 
+            stroke-linejoin: round; 
+            stroke-dasharray: 200; 
+            stroke-dashoffset: 200; 
+            animation: drawCheck 0.5s ease-out forwards; 
+            animation-delay: 0.8s; 
+        }
+        @keyframes popIn { to { scale: 1; } } 
+        @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+        .success-details { 
+            text-align: center; 
+            opacity: 0; 
+            transform: translateY(20px); 
+            animation: slideUp 0.5s forwards; 
+            animation-delay: 1.3s; 
+        }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-        .paid-title { font-size: 28px; font-weight: 900; letter-spacing: -1px; margin: 0; }
-        .amount-display { font-size: 42px; font-weight: 800; color: #ffffff; text-align: center; margin: 10px 0 30px 0; position: relative; }
-        .amount-display::after { content: ''; display: block; width: 50px; height: 3px; background: var(--safaricom-green); margin: 8px auto 0 auto; border-radius: 2px; }
-        .receipt-label { text-transform: uppercase; letter-spacing: 2px; font-size: 12px; color: var(--text-muted); margin-top: 15px; margin-bottom: 5px; }
-        .receipt-id { font-family: monospace; font-size: 24px; font-weight: bold; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.1); }
-        .done-btn-group { margin-top: 40px; width: 200px; }
-        .done-btn { background: #ffffff; color: #000; }
+        .paid-title { 
+            font-size: 26px; 
+            font-weight: 800; 
+            letter-spacing: -0.5px; 
+            margin: 0; 
+        }
+        .amount-display { 
+            font-size: 40px; 
+            font-weight: 700; 
+            color: #ffffff; 
+            text-align: center; 
+            margin: 12px 0 28px 0; 
+            position: relative;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -1px;
+        }
+        .amount-display::after { 
+            content: ''; 
+            display: block; 
+            width: 40px; height: 3px; 
+            background: var(--safaricom-green); 
+            margin: 10px auto 0 auto; 
+            border-radius: 3px; 
+        }
+        .receipt-label { 
+            text-transform: uppercase; 
+            letter-spacing: 2.5px; 
+            font-size: 11px; 
+            color: var(--text-muted); 
+            margin-top: 12px; 
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .receipt-id { 
+            font-family: 'JetBrains Mono', monospace; 
+            font-size: 22px; 
+            font-weight: 700; 
+            background: rgba(0,0,0,0.35); 
+            padding: 8px 18px; 
+            border-radius: var(--radius-md); 
+            border: 1.5px solid rgba(255,255,255,0.08);
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+        }
+        .done-btn-group { margin-top: 36px; width: 220px; }
+        .done-btn { 
+            background: #ffffff; 
+            color: #0a0f1c;
+            font-weight: 700;
+        }
+        .done-btn:hover:not([disabled]) {
+            box-shadow: var(--shadow-lg), 0 0 20px rgba(255,255,255,0.15);
+        }
 
         /* --- Report View Styles --- */
-        #reportView { max-width: 600px; width: 90%; }
-        .report-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 1px solid var(--card-border); padding-bottom: 15px; }
-        .report-header h2 { margin: 0; text-align: left; }
-        .report-total { font-size: 24px; font-weight: 800; color: var(--safaricom-green); }
-        .table-container { max-height: 300px; overflow-y: auto; margin-bottom: 20px; border-radius: 8px; background: rgba(0,0,0,0.2); }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
-        th { background: rgba(255,255,255,0.05); padding: 12px; color: var(--text-muted); font-weight: bold; text-transform: uppercase; font-size: 12px; position: sticky; top: 0; }
-        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .tx-receipt { font-family: monospace; color: #fff; font-weight: bold; }
-        .tx-amount { color: var(--safaricom-green); font-weight: bold; }
-        .empty-state { text-align: center; padding: 30px; color: var(--text-muted); }
-        .back-btn { background: rgba(255,255,255,0.1); }
-        .back-btn:hover { background: rgba(255,255,255,0.2); }
+        #reportView { max-width: 680px; width: 92%; }
+        .report-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-end; 
+            margin-bottom: 24px; 
+            border-bottom: 1px solid var(--card-border); 
+            padding-bottom: 16px; 
+        }
+        .report-header h2 { margin: 0; text-align: left; font-size: 20px; }
+        .report-total { 
+            font-size: 22px; 
+            font-weight: 700; 
+            color: var(--safaricom-green);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .table-container { 
+            max-height: 320px; 
+            overflow-y: auto; 
+            margin-bottom: 20px; 
+            border-radius: var(--radius-md); 
+            background: rgba(0,0,0,0.25);
+            border: 1px solid var(--card-border);
+            scrollbar-width: thin;
+            scrollbar-color: var(--text-dim) transparent;
+        }
+        .table-container::-webkit-scrollbar { width: 6px; }
+        .table-container::-webkit-scrollbar-track { background: transparent; }
+        .table-container::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 10px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        th { 
+            background: rgba(255,255,255,0.04); 
+            padding: 12px 14px; 
+            color: var(--text-muted); 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            font-size: 10px; 
+            position: sticky; top: 0;
+            letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+        }
+        td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text-secondary); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        .tx-receipt { 
+            font-family: 'JetBrains Mono', monospace; 
+            color: var(--text-main); 
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .tx-amount { 
+            color: var(--safaricom-green); 
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .tx-phone { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+        .empty-state { 
+            text-align: center; 
+            padding: 40px 20px; 
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .back-btn { 
+            background: rgba(255,255,255,0.08);
+            font-size: 13px;
+            padding: 14px;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.14); }
+
+        /* Status messages */
+        .status-message { 
+            font-size: 13px; 
+            margin-top: 12px; 
+            min-height: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            header { padding: 10px 16px; }
+            .logo-group img { height: 30px; }
+            .system-title { font-size: 11px; }
+            .glass-card { padding: 24px; border-radius: var(--radius-lg); }
+            h2 { font-size: 20px; margin-bottom: 22px; }
+            #manualAmount { font-size: 22px; height: 54px; }
+            .amount-display { font-size: 32px; }
+            .paid-title { font-size: 22px; }
+            .receipt-id { font-size: 18px; }
+            .check-container { width: 120px; height: 120px; }
+            .report-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .report-total { font-size: 20px; }
+        }
+
+        /* Entrance animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .glass-card { animation: fadeInUp 0.5s ease-out; }
     </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -197,7 +570,7 @@
         </div>
         <div class="system-title" id="branchTitle">SpeedyMart POS</div>
     </header>
-    
+
     <main>
         <div id="bgDataLines"></div>
 
@@ -205,11 +578,17 @@
             <h2>Cashier Access</h2>
             <form id="loginForm">
                 <div class="input-group">
-                    <label for="username">Username</label>
+                    <label for="username">
+                        <span class="material-symbols-outlined icon-sm">person</span>
+                        Username
+                    </label>
                     <input type="text" id="username" placeholder="e.g., jane" required autocomplete="off">
                 </div>
                 <div class="input-group">
-                    <label for="password">Password</label>
+                    <label for="password">
+                        <span class="material-symbols-outlined icon-sm">lock</span>
+                        Password
+                    </label>
                     <input type="password" id="password" placeholder="****" required>
                 </div>
                 <button type="submit" id="loginBtn">Unlock Terminal</button>
@@ -223,7 +602,10 @@
 
                 <form id="paymentForm">
                     <div class="input-group amount-input-group">
-                        <label for="manualAmount">Transaction Amount</label>
+                        <label for="manualAmount">
+                            <span class="material-symbols-outlined icon-sm">payments</span>
+                            Transaction Amount
+                        </label>
                         <div class="currency-wrapper">
                             <span class="currency-symbol">Ksh</span>
                             <input type="number" id="manualAmount" placeholder="0.00" min="1" step="any" required autocomplete="off">
@@ -231,11 +613,17 @@
                     </div>
 
                     <div class="input-group">
-                        <label for="phone">Customer Number (M-PESA)</label>
+                        <label for="phone">
+                            <span class="material-symbols-outlined icon-sm">smartphone</span>
+                            Customer Number (M-PESA)
+                        </label>
                         <input type="tel" id="phone" placeholder="e.g., 0722..." required autocomplete="off">
                     </div>
-                    
-                    <button type="submit" id="submitBtn">Send M-Pesa Request</button>
+
+                    <button type="submit" id="submitBtn">
+                        <span class="material-symbols-outlined icon-sm" style="margin-right:4px;vertical-align:middle;">send</span>
+                        Send M-Pesa Request
+                    </button>
                 </form>
                 <div class="status-message" id="paymentInputStatus"></div>
             </div>
@@ -245,6 +633,7 @@
                     <img src="mpesa.png" alt="M" class="mpesa-logo-static" style="border-radius: 50%;">
                     <div class="pulse-ring"></div>
                     <div class="pulse-ring"></div>
+                    <div class="pulse-ring"></div>
                 </div>
                 <div class="waiting-text success-text">STK PUSH SENT</div>
                 <div class="sub-text">Awaiting customer PIN confirmation... Do not refresh the page.</div>
@@ -252,8 +641,14 @@
             </div>
 
             <div class="bottom-links">
-                <a class="text-link" id="viewReportBtn">📊 Daily Report</a>
-                <a class="text-link logout-link" id="logoutBtn">🔒 Lock Terminal</a>
+                <a class="text-link" id="viewReportBtn">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    Daily Report
+                </a>
+                <a class="text-link logout-link" id="logoutBtn">
+                    <span class="material-symbols-outlined">lock</span>
+                    Lock Terminal
+                </a>
             </div>
         </div>
 
@@ -261,7 +656,7 @@
             <div class="report-header">
                 <div>
                     <h2>Today's Summary</h2>
-                    <div style="font-size: 13px; color: var(--text-muted);" id="reportDate">Loading...</div>
+                    <div style="font-size: 12px; color: var(--text-muted); font-weight: 500;" id="reportDate">Loading...</div>
                 </div>
                 <div class="report-total" id="reportTotal">Ksh 0.00</div>
             </div>
@@ -282,7 +677,10 @@
                 </table>
             </div>
 
-            <button class="back-btn" id="backToPosBtn">Back to POS</button>
+            <button class="back-btn" id="backToPosBtn">
+                <span class="material-symbols-outlined icon-sm" style="margin-right:4px;vertical-align:middle;">arrow_back</span>
+                Back to POS
+            </button>
         </div>
     </main>
 
@@ -300,7 +698,10 @@
             <div class="receipt-label">M-Pesa Receipt</div>
             <div class="receipt-id" id="successReceiptId">XXXXXXXXXX</div>
             <div class="done-btn-group">
-                <button class="done-btn" id="finishBtn">New Transaction</button>
+                <button class="done-btn" id="finishBtn">
+                    <span class="material-symbols-outlined icon-sm" style="margin-right:4px;vertical-align:middle;">add</span>
+                    New Transaction
+                </button>
             </div>
         </div>
     </div>
@@ -376,7 +777,7 @@
             ui.overlay.classList.add('hidden');
             ui.checkout.classList.remove('hidden');
             resetCheckoutState();
-            
+
             if (urlAmount && !isNaN(urlAmount)) {
                 ui.inputs.amount.value = urlAmount;
             } else {
@@ -387,17 +788,17 @@
         function showReport() {
             ui.checkout.classList.add('hidden');
             ui.report.classList.remove('hidden');
-            
+
             document.getElementById('reportDate').innerText = new Date().toLocaleDateString('en-KE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             const tbody = document.getElementById('reportTableBody');
             tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Loading transactions...</td></tr>';
-            
+
             fetch('/api/transactions/today')
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
                         document.getElementById('reportTotal').innerText = 'Ksh ' + Number(data.total).toLocaleString('en-KE', { minimumFractionDigits: 2 });
-                        
+
                         if (data.transactions.length === 0) {
                             tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No transactions yet today.</td></tr>';
                             return;
@@ -407,12 +808,12 @@
                         data.transactions.forEach(tx => {
                             const timeStr = new Date(tx.created_at).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
                             const amountStr = Number(tx.amount).toLocaleString('en-KE', { minimumFractionDigits: 2 });
-                            
+
                             tbody.innerHTML += `
                                 <tr>
                                     <td>${timeStr}</td>
                                     <td class="tx-receipt">${tx.receipt}</td>
-                                    <td>${tx.phone}</td>
+                                    <td class="tx-phone">${tx.phone}</td>
                                     <td class="tx-amount">Ksh ${amountStr}</td>
                                 </tr>
                             `;
@@ -448,12 +849,12 @@
             createConfetti();
         }
 
-        // --- NEW: USERNAME & PASSWORD LOGIN HANDLER ---
+        // --- USERNAME & PASSWORD LOGIN HANDLER ---
         ui.forms.login.addEventListener('submit', function(e) {
             e.preventDefault();
             const user = ui.inputs.username.value.trim();
             const pass = ui.inputs.password.value;
-            
+
             ui.btns.login.innerText = "Verifying...";
             ui.btns.login.disabled = true;
             ui.status.login.innerHTML = "";
@@ -471,10 +872,10 @@
                     ui.inputs.password.value = ''; 
                     showCheckout();
                 } else {
-                    ui.status.login.innerHTML = `<span class='error-text'>🔒 ${data.message}</span>`;
+                    ui.status.login.innerHTML = `<span class='error-text'>${data.message}</span>`;
                 }
             })
-            .catch(() => ui.status.login.innerHTML = "<span class='error-text'>🚫 Server Error.</span>")
+            .catch(() => ui.status.login.innerHTML = "<span class='error-text'>Server Error.</span>")
             .finally(() => {
                 ui.btns.login.innerText = "Unlock Terminal";
                 ui.btns.login.disabled = false;
@@ -485,14 +886,14 @@
             e.preventDefault();
             const phone = ui.inputs.phone.value.trim();
             const submittedAmount = ui.inputs.amount.value.trim();
-            
+
             if (!/^(?:254|\+254|0)?(7|1)(?:(?:[0-9][0-9])|(?:0[0-8]))[0-9]{6}$/.test(phone)) {
-                ui.status.input.innerHTML = "<span class='error-text'>⚠️ Invalid M-Pesa format. Use 07...</span>";
+                ui.status.input.innerHTML = "<span class='error-text'>Invalid M-Pesa format. Use 07...</span>";
                 return;
             }
 
             if (!submittedAmount || isNaN(submittedAmount) || Number(submittedAmount) <= 0) {
-                ui.status.input.innerHTML = "<span class='error-text'>⚠️ Please enter a valid amount.</span>";
+                ui.status.input.innerHTML = "<span class='error-text'>Please enter a valid amount.</span>";
                 return;
             }
 
@@ -510,7 +911,7 @@
             .then(data => {
                 if (data.success) {
                     ui.status.process.innerHTML = "<span class='sub-text'>Waiting for PIN stream...</span>";
-                    
+
                     const eventSource = new EventSource(`/api/stream-payment/${data.refId}`);
 
                     eventSource.onmessage = function(event) {
@@ -528,12 +929,12 @@
 
                 } else {
                     resetCheckoutState();
-                    ui.status.input.innerHTML = `<span class='error-text'>❌ STK Fail: ${data.message}</span>`;
+                    ui.status.input.innerHTML = `<span class='error-text'>STK Fail: ${data.message}</span>`;
                 }
             })
             .catch(() => {
                 resetCheckoutState();
-                ui.status.input.innerHTML = "<span class='error-text'>🚫 Server connection error.</span>";
+                ui.status.input.innerHTML = "<span class='error-text'>Server connection error.</span>";
             });
         });
 
