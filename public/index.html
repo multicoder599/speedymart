@@ -2,66 +2,607 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SpeedyMart Admin Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cause:wght@100..900&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
     <style>
-        body { margin: 0; font-family: 'Cause', sans-serif; background: #0f172a; color: #f8fafc; }
+        :root {
+            --safaricom-green: #89c53f;
+            --safaricom-green-glow: rgba(137, 197, 63, 0.2);
+            --safaricom-red: #e31b23;
+            --megapay-blue: #0d6efd;
+            --megapay-blue-glow: rgba(13, 110, 253, 0.2);
+            --amber: #f59e0b;
+            --amber-hover: #d97706;
+
+            --bg-color: #0a0f1c;
+            --bg-elevated: #111827;
+            --card-bg: rgba(17, 24, 39, 0.6);
+            --card-bg-hover: rgba(17, 24, 39, 0.75);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --card-border-hover: rgba(255, 255, 255, 0.12);
+            --text-main: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --text-dim: #475569;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -2px rgba(0,0,0,0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -4px rgba(0,0,0,0.3);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body { 
+            margin: 0; 
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.5;
+
+            background-image: 
+                radial-gradient(ellipse at 10% 0%, rgba(13, 110, 253, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 100%, rgba(137, 197, 63, 0.04) 0%, transparent 50%),
+                linear-gradient(0deg, transparent 24%, rgba(255,255,255,0.01) 25%, rgba(255,255,255,0.01) 26%, transparent 27%, transparent 74%, rgba(255,255,255,0.01) 75%, rgba(255,255,255,0.01) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(255,255,255,0.01) 25%, rgba(255,255,255,0.01) 26%, transparent 27%, transparent 74%, rgba(255,255,255,0.01) 75%, rgba(255,255,255,0.01) 76%, transparent 77%, transparent);
+            background-size: 100% 100%, 100% 100%, 50px 50px, 50px 50px;
+            animation: bgMove 100s linear infinite;
+        }
+
+        @keyframes bgMove {
+            0% { background-position: 0 0, 0 0, 0 0, 0 0; }
+            100% { background-position: 0 0, 0 0, 500px 1000px, 500px 1000px; }
+        }
+
         .hidden { display: none !important; }
-        .container { padding: 40px; max-width: 1000px; margin: auto; }
-        
-        .card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 12px; margin-bottom: 20px;}
-        input, select { width: 100%; padding: 12px; margin: 10px 0; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-family: 'Cause'; box-sizing: border-box;}
-        button { padding: 12px 20px; background: #0d6efd; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-family: 'Cause'; }
-        button:hover { background: #0b5ed7; }
-        
-        .nav { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;}
-        .nav button { width: auto; background: #334155; }
-        .nav button.active { background: #0d6efd; }
+        .success { color: var(--safaricom-green) !important; font-weight: 700; }
+        .error { color: var(--safaricom-red) !important; font-weight: 700; }
 
-        .day-filters { display: flex; gap: 10px; margin-top: 15px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px;}
-        .day-btn { background: #1e293b; border: 1px solid #334155; color: #94a3b8; width: auto; white-space: nowrap;}
-        .day-btn.active { background: #89c53f; color: #000; border-color: #89c53f; }
+        /* Material Symbols */
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 20px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+            vertical-align: middle;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-sm { font-size: 16px; }
+        .icon-md { font-size: 20px; }
+        .icon-lg { font-size: 24px; }
 
-        .total-display { font-size: 24px; font-weight: bold; color: #89c53f; margin-bottom: 15px; text-align: right;}
+        /* Container */
+        .container { 
+            padding: 20px; 
+            max-width: 1100px; 
+            margin: auto; 
+        }
+        @media (max-width: 640px) {
+            .container { padding: 12px; }
+        }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; }
-        th { color: #94a3b8; }
-        
-        .success { color: #89c53f; font-weight: bold; }
-        .error { color: #e31b23; font-weight: bold; }
-        .btn-small { width: auto; padding: 6px 12px; font-size: 12px; margin-right: 5px; }
-        .btn-danger { background: #e31b23; }
-        .btn-danger:hover { background: #c8181f; }
-        .btn-edit { background: #f59e0b; }
-        .btn-edit:hover { background: #d97706; }
-        
-        #loginView { max-width: 400px; margin: 100px auto; }
+        /* Cards */
+        .card { 
+            background: var(--card-bg); 
+            backdrop-filter: blur(16px) saturate(150%);
+            -webkit-backdrop-filter: blur(16px) saturate(150%);
+            border: 1px solid var(--card-border); 
+            padding: 24px; 
+            border-radius: var(--radius-lg); 
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-md), 0 0 0 1px rgba(255,255,255,0.02);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            border-color: var(--card-border-hover);
+        }
+        @media (max-width: 640px) {
+            .card { padding: 16px; border-radius: var(--radius-md); }
+        }
+
+        h1 { 
+            font-size: 26px; 
+            font-weight: 800; 
+            margin: 0 0 24px 0; 
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h2 { 
+            font-size: 18px; 
+            font-weight: 700; 
+            margin: 0 0 18px 0; 
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        h2 .material-symbols-outlined { color: var(--text-muted); }
+        @media (max-width: 640px) {
+            h1 { font-size: 22px; margin-bottom: 16px; }
+            h2 { font-size: 16px; margin-bottom: 14px; }
+        }
+
+        /* Inputs & Selects */
+        input, select { 
+            width: 100%; 
+            padding: 12px 14px; 
+            margin: 8px 0; 
+            background: rgba(0,0,0,0.35); 
+            color: var(--text-main); 
+            border: 1.5px solid rgba(255,255,255,0.08); 
+            border-radius: var(--radius-md); 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-sizing: border-box;
+        }
+        input::placeholder { color: var(--text-dim); font-weight: 400; }
+        input:focus, select:focus { 
+            border-color: var(--megapay-blue); 
+            box-shadow: 0 0 0 3px var(--megapay-blue-glow), inset 0 1px 2px rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.45);
+        }
+        input:hover:not(:focus), select:hover:not(:focus) { border-color: rgba(255,255,255,0.14); }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+        select option { background: var(--bg-elevated); color: var(--text-main); }
+
+        /* Buttons */
+        button { 
+            padding: 12px 20px; 
+            background: var(--megapay-blue); 
+            color: white; 
+            border: none; 
+            border-radius: var(--radius-md); 
+            cursor: pointer; 
+            font-weight: 700; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        button:hover:not(:disabled) { 
+            background: #0056b3; 
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md), 0 0 15px var(--megapay-blue-glow);
+        }
+        button:active { transform: translateY(0) scale(0.98); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-primary { background: var(--megapay-blue); }
+        .btn-primary:hover:not(:disabled) { background: #0056b3; }
+        .btn-danger { background: var(--safaricom-red); }
+        .btn-danger:hover:not(:disabled) { background: #c8181f; box-shadow: var(--shadow-md), 0 0 15px rgba(227,27,35,0.2); }
+        .btn-edit { background: var(--amber); color: #0a0f1c; }
+        .btn-edit:hover:not(:disabled) { background: var(--amber-hover); }
+        .btn-success { background: var(--safaricom-green); color: #0a0f1c; }
+        .btn-success:hover:not(:disabled) { background: #7ab436; box-shadow: var(--shadow-md), 0 0 15px var(--safaricom-green-glow); }
+        .btn-ghost { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+        .btn-ghost:hover:not(:disabled) { background: rgba(255,255,255,0.14); color: var(--text-main); }
+        .btn-small { padding: 8px 14px; font-size: 12px; border-radius: var(--radius-sm); }
+        .btn-icon { padding: 8px; border-radius: var(--radius-sm); }
+
+        /* Navigation Tabs */
+        .nav { 
+            display: flex; 
+            gap: 8px; 
+            margin-bottom: 24px; 
+            flex-wrap: wrap;
+            background: rgba(0,0,0,0.25);
+            padding: 6px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--card-border);
+        }
+        .nav button { 
+            width: auto; 
+            background: transparent; 
+            color: var(--text-muted);
+            box-shadow: none;
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+        }
+        .nav button:hover:not(:disabled) { 
+            background: rgba(255,255,255,0.05); 
+            color: var(--text-secondary);
+            box-shadow: none;
+            transform: none;
+        }
+        .nav button.active { 
+            background: var(--megapay-blue); 
+            color: #fff;
+            box-shadow: var(--shadow-sm);
+        }
+        .nav button.active:hover:not(:disabled) {
+            background: #0056b3;
+            box-shadow: var(--shadow-sm);
+            transform: none;
+        }
+        @media (max-width: 640px) {
+            .nav { gap: 4px; padding: 4px; }
+            .nav button { padding: 8px 12px; font-size: 12px; flex: 1; min-width: 0; white-space: nowrap; }
+        }
+
+        /* Day Filters */
+        .day-filters { 
+            display: flex; 
+            gap: 8px; 
+            margin-top: 12px; 
+            margin-bottom: 4px; 
+            overflow-x: auto; 
+            padding-bottom: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--text-dim) transparent;
+        }
+        .day-filters::-webkit-scrollbar { height: 4px; }
+        .day-filters::-webkit-scrollbar-track { background: transparent; }
+        .day-filters::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 10px; }
+        .day-btn { 
+            background: rgba(255,255,255,0.04); 
+            border: 1.5px solid var(--card-border); 
+            color: var(--text-muted); 
+            width: auto; 
+            white-space: nowrap;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .day-btn:hover { 
+            background: rgba(255,255,255,0.08); 
+            border-color: rgba(255,255,255,0.15);
+            color: var(--text-secondary);
+        }
+        .day-btn.active { 
+            background: var(--safaricom-green); 
+            color: #0a0f1c; 
+            border-color: var(--safaricom-green);
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(137,197,63,0.25);
+        }
+
+        /* Total Display */
+        .total-display { 
+            font-size: 20px; 
+            font-weight: 700; 
+            color: var(--safaricom-green); 
+            margin-bottom: 16px;
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.5px;
+            padding: 12px 16px;
+            background: rgba(137,197,63,0.08);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(137,197,63,0.15);
+        }
+        @media (max-width: 640px) {
+            .total-display { font-size: 16px; text-align: left; }
+        }
+
+        /* Tables */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--card-border);
+            background: rgba(0,0,0,0.2);
+            scrollbar-width: thin;
+            scrollbar-color: var(--text-dim) transparent;
+        }
+        .table-wrap::-webkit-scrollbar { height: 6px; }
+        .table-wrap::-webkit-scrollbar-track { background: transparent; }
+        .table-wrap::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 10px; }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 13px;
+            min-width: 500px;
+        }
+        th { 
+            background: rgba(255,255,255,0.04); 
+            padding: 12px 14px; 
+            color: var(--text-muted); 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            font-size: 10px; 
+            letter-spacing: 1px;
+            text-align: left;
+            white-space: nowrap;
+        }
+        td { 
+            padding: 12px 14px; 
+            border-bottom: 1px solid rgba(255,255,255,0.04); 
+            color: var(--text-secondary);
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .tx-receipt { 
+            font-family: 'JetBrains Mono', monospace; 
+            color: var(--text-main); 
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 0.3px;
+        }
+        .tx-amount { 
+            color: var(--safaricom-green); 
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .tx-phone { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+        .tx-time { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); }
+
+        /* Empty state */
+        .empty-state { 
+            text-align: center; 
+            padding: 40px 20px; 
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 14px;
+        }
+
+        /* Login View */
+        #loginView { 
+            max-width: 420px; 
+            margin: 80px auto; 
+            text-align: center;
+        }
+        #loginView h2 {
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 28px;
+        }
+        #loginView .logo-area {
+            margin-bottom: 32px;
+        }
+        #loginView .logo-area img {
+            height: 48px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+        }
+        @media (max-width: 640px) {
+            #loginView { margin: 40px auto; padding: 16px; }
+            #loginView h2 { font-size: 20px; }
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+        }
+        .form-grid input, .form-grid select { margin: 0; }
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .form-grid button { width: 100%; }
+        }
+
+        /* Settings */
+        .settings-card {
+            max-width: 480px;
+        }
+        .settings-card p {
+            color: var(--text-muted); 
+            font-size: 14px; 
+            line-height: 1.6;
+            margin: 0 0 20px 0;
+        }
+        .settings-card label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        /* Header bar */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .top-bar h1 { margin: 0; }
+        .top-bar .logout-btn {
+            background: rgba(227, 27, 35, 0.15);
+            color: var(--safaricom-red);
+            border: 1px solid rgba(227, 27, 35, 0.25);
+        }
+        .top-bar .logout-btn:hover:not(:disabled) {
+            background: rgba(227, 27, 35, 0.25);
+            box-shadow: 0 0 15px rgba(227,27,35,0.15);
+        }
+        @media (max-width: 640px) {
+            .top-bar { margin-bottom: 16px; }
+            .top-bar h1 { font-size: 20px; }
+        }
+
+        /* Action buttons cell */
+        .actions-cell {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 640px) {
+            .actions-cell { gap: 4px; }
+            .actions-cell .btn-small { padding: 6px 10px; font-size: 11px; }
+        }
+
+        /* Branch badge */
+        .branch-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(13, 110, 253, 0.12);
+            color: var(--megapay-blue);
+            border: 1px solid rgba(13, 110, 253, 0.2);
+        }
+        .branch-badge.gatunga { background: rgba(137,197,63,0.12); color: var(--safaricom-green); border-color: rgba(137,197,63,0.2); }
+        .branch-badge.marimanti { background: rgba(13,110,253,0.12); color: var(--megapay-blue); border-color: rgba(13,110,253,0.2); }
+
+        /* Entrance animation */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card, .nav { animation: fadeInUp 0.4s ease-out; }
+
+        /* Mobile table cards */
+        @media (max-width: 640px) {
+            .mobile-card-list {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .mobile-card {
+                background: rgba(0,0,0,0.2);
+                border: 1px solid var(--card-border);
+                border-radius: var(--radius-md);
+                padding: 14px;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .mobile-card .mc-label {
+                font-size: 10px;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                font-weight: 600;
+                grid-column: span 2;
+            }
+            .mobile-card .mc-value {
+                font-size: 13px;
+                color: var(--text-secondary);
+            }
+            .mobile-card .mc-value.main {
+                color: var(--text-main);
+                font-weight: 600;
+            }
+            .mobile-card .mc-actions {
+                grid-column: span 2;
+                display: flex;
+                gap: 6px;
+                margin-top: 4px;
+                padding-top: 10px;
+                border-top: 1px solid var(--card-border);
+            }
+        }
     </style>
+<base target="_blank">
 </head>
 <body>
 
-    <div id="loginView" class="container card">
-        <h2 style="text-align: center;">Super Admin Login</h2>
-        <input type="text" id="adminUser" placeholder="Username">
-        <input type="password" id="adminPass" placeholder="Password">
-        <button onclick="login()">Access System</button>
-        <div id="loginMsg" style="margin-top: 15px; text-align: center;"></div>
+    <!-- LOGIN VIEW -->
+    <div id="loginView" class="container">
+        <div class="card" style="padding: 36px 28px;">
+            <div class="logo-area">
+                <img src="speedy.png" alt="SpeedyMart" style="height: 44px;">
+            </div>
+            <h2>
+                <span class="material-symbols-outlined icon-lg">shield</span>
+                Super Admin Login
+            </h2>
+            <div class="input-group">
+                <label style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:6px;display:block;">Username</label>
+                <input type="text" id="adminUser" placeholder="Enter username" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:6px;display:block;">Password</label>
+                <input type="password" id="adminPass" placeholder="Enter password">
+            </div>
+            <button onclick="login()" style="margin-top:8px;">
+                <span class="material-symbols-outlined icon-sm">login</span>
+                Access System
+            </button>
+            <div id="loginMsg" style="margin-top: 16px; text-align: center; font-size: 13px; min-height: 20px;"></div>
+        </div>
     </div>
 
+    <!-- DASHBOARD VIEW -->
     <div id="dashboardView" class="container hidden">
-        <h1>SpeedyMart Control Center</h1>
-        <div class="nav">
-            <button id="tabTx" class="active" onclick="switchTab('tx')">Transactions</button>
-            <button id="tabCashiers" onclick="switchTab('cashiers')">Manage Cashiers</button>
-            <button id="tabSettings" onclick="switchTab('settings')">⚙️ Settings</button>
-            <button style="background: #e31b23; margin-left: auto;" onclick="logout()">Logout</button>
+        <div class="top-bar">
+            <h1>
+                <span class="material-symbols-outlined icon-lg" style="color:var(--megapay-blue);">dashboard</span>
+                SpeedyMart Control Center
+            </h1>
+            <button class="logout-btn btn-small" onclick="logout()">
+                <span class="material-symbols-outlined icon-sm">logout</span>
+                Logout
+            </button>
         </div>
 
+        <div class="nav">
+            <button id="tabTx" class="active" onclick="switchTab('tx')">
+                <span class="material-symbols-outlined icon-sm">receipt_long</span>
+                Transactions
+            </button>
+            <button id="tabCashiers" onclick="switchTab('cashiers')">
+                <span class="material-symbols-outlined icon-sm">group</span>
+                Cashiers
+            </button>
+            <button id="tabSettings" onclick="switchTab('settings')">
+                <span class="material-symbols-outlined icon-sm">settings</span>
+                Settings
+            </button>
+        </div>
+
+        <!-- TRANSACTIONS TAB -->
         <div id="txArea">
             <div class="card">
-                <h2>Branch & Day Filter</h2>
+                <h2>
+                    <span class="material-symbols-outlined">filter_list</span>
+                    Branch & Day Filter
+                </h2>
                 <select id="storeFilter" onchange="loadTransactions()">
                     <option value="3007">Gatunga Branch</option>
                     <option value="3008">Marimanti Branch</option>
@@ -71,52 +612,89 @@
 
             <div class="card">
                 <div class="total-display" id="dayTotalDisplay">Total: Ksh 0.00</div>
-                <table>
-                    <thead><tr><th>Time</th><th>Receipt</th><th>Phone</th><th>Amount</th></tr></thead>
-                    <tbody id="txTable"></tbody>
-                </table>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Receipt</th>
+                                <th>Phone</th>
+                                <th style="text-align:right;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="txTable"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
+        <!-- CASHIERS TAB -->
         <div id="cashierArea" class="hidden">
             <div class="card" id="cashierFormCard">
-                <h2 id="cashierFormTitle">Create New Cashier</h2>
+                <h2 id="cashierFormTitle">
+                    <span class="material-symbols-outlined">person_add</span>
+                    Create New Cashier
+                </h2>
                 <input type="hidden" id="editCashierId">
-                <div style="display: flex; gap: 10px;">
+                <div class="form-grid">
                     <input type="text" id="newUsername" placeholder="Username (e.g., jane_gatanga)">
-                    <input type="password" id="newPassword" placeholder="Password (Leave blank if editing to keep old)">
+                    <input type="password" id="newPassword" placeholder="Password (blank = keep old)">
                     <select id="newStore">
                         <option value="3007">Gatunga Branch</option>
                         <option value="3008">Marimanti Branch</option>
                     </select>
-                    <button id="cashierSubmitBtn" style="width: 150px;" onclick="saveCashier()">Create</button>
-                    <button id="cashierCancelBtn" class="hidden btn-danger" style="width: 100px;" onclick="resetCashierForm()">Cancel</button>
+                    <button id="cashierSubmitBtn" class="btn-success" onclick="saveCashier()">
+                        <span class="material-symbols-outlined icon-sm">add</span>
+                        Create
+                    </button>
+                    <button id="cashierCancelBtn" class="hidden btn-danger" onclick="resetCashierForm()">
+                        <span class="material-symbols-outlined icon-sm">close</span>
+                        Cancel
+                    </button>
                 </div>
-                <div id="cashierMsg" style="margin-top: 10px;"></div>
+                <div id="cashierMsg" style="margin-top: 12px; font-size: 13px; min-height: 20px;"></div>
             </div>
 
             <div class="card">
-                <h2>Active Cashiers</h2>
-                <table>
-                    <thead><tr><th>Username</th><th>Assigned Store</th><th>Actions</th></tr></thead>
-                    <tbody id="cashierTable"></tbody>
-                </table>
+                <h2>
+                    <span class="material-symbols-outlined">groups</span>
+                    Active Cashiers
+                </h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Store</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cashierTable"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
+        <!-- SETTINGS TAB -->
         <div id="settingsArea" class="hidden">
-            <div class="card" style="max-width: 400px;">
-                <h2>Change Admin Login</h2>
-                <p style="color: #94a3b8; font-size: 14px;">Update your master username and password here. You will be logged out automatically after updating.</p>
-                
-                <label style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">New Boss Username</label>
+            <div class="card settings-card">
+                <h2>
+                    <span class="material-symbols-outlined">admin_panel_settings</span>
+                    Change Admin Login
+                </h2>
+                <p>Update your master username and password. You will be logged out automatically after updating.</p>
+
+                <label>New Boss Username</label>
                 <input type="text" id="newBossUser" placeholder="Enter new username">
-                
-                <label style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">New Boss Password</label>
+
+                <label style="margin-top:12px;display:block;">New Boss Password</label>
                 <input type="password" id="newBossPass" placeholder="Enter new password">
-                
-                <button onclick="updateBossCredentials()" style="background: #f59e0b; margin-top: 10px;">Update Credentials</button>
-                <div id="settingsMsg" style="margin-top: 15px; text-align: center;"></div>
+
+                <button onclick="updateBossCredentials()" class="btn-edit" style="margin-top: 16px; width: 100%;">
+                    <span class="material-symbols-outlined icon-sm">save</span>
+                    Update Credentials
+                </button>
+                <div id="settingsMsg" style="margin-top: 16px; text-align: center; font-size: 13px; min-height: 20px;"></div>
             </div>
         </div>
     </div>
@@ -138,7 +716,7 @@
                     loadTransactions();
                     loadCashiers();
                 } else {
-                    document.getElementById('loginMsg').innerHTML = `<span class="error">Invalid login</span>`;
+                    document.getElementById('loginMsg').innerHTML = `<span class="error">Invalid login credentials</span>`;
                 }
             });
         }
@@ -147,13 +725,12 @@
             document.getElementById('txArea').classList.toggle('hidden', tab !== 'tx');
             document.getElementById('cashierArea').classList.toggle('hidden', tab !== 'cashiers');
             document.getElementById('settingsArea').classList.toggle('hidden', tab !== 'settings');
-            
+
             document.getElementById('tabTx').classList.toggle('active', tab === 'tx');
             document.getElementById('tabCashiers').classList.toggle('active', tab === 'cashiers');
             document.getElementById('tabSettings').classList.toggle('active', tab === 'settings');
         }
 
-        // --- NEW: BOSS CREDENTIAL UPDATE ---
         function updateBossCredentials() {
             const newUsername = document.getElementById('newBossUser').value.trim();
             const newPassword = document.getElementById('newBossPass').value;
@@ -171,7 +748,7 @@
                 const msg = document.getElementById('settingsMsg');
                 if (data.success) {
                     msg.innerHTML = `<span class="success">${data.message}</span>`;
-                    setTimeout(() => logout(), 2500); // Kicks boss out after 2.5 seconds
+                    setTimeout(() => logout(), 2500);
                 } else {
                     msg.innerHTML = `<span class="error">${data.message}</span>`;
                 }
@@ -192,13 +769,13 @@
         function generateDayFilters() {
             const filterContainer = document.getElementById('dayFilters');
             filterContainer.innerHTML = '';
-            
+
             const uniqueDays = [...new Set(allTransactions.map(tx => {
                 return new Date(tx.created_at).toLocaleDateString('en-KE', {weekday: 'long', month: 'short', day: 'numeric'});
             }))];
 
             if(uniqueDays.length === 0) {
-                filterContainer.innerHTML = '<span style="color:gray;">No transactions found.</span>';
+                filterContainer.innerHTML = '<span style="color:var(--text-muted);font-size:13px;font-style:italic;">No transactions found.</span>';
                 document.getElementById('txTable').innerHTML = '';
                 document.getElementById('dayTotalDisplay').innerText = 'Total: Ksh 0.00';
                 return;
@@ -220,7 +797,7 @@
         function renderTransactionTable() {
             const tbody = document.getElementById('txTable');
             tbody.innerHTML = '';
-            
+
             const dayTxs = allTransactions.filter(tx => {
                 return new Date(tx.created_at).toLocaleDateString('en-KE', {weekday: 'long', month: 'short', day: 'numeric'}) === activeDay;
             });
@@ -228,13 +805,18 @@
             const total = dayTxs.reduce((sum, tx) => sum + tx.amount, 0);
             document.getElementById('dayTotalDisplay').innerText = `${activeDay} Total: Ksh ${total.toLocaleString()}`;
 
+            if (dayTxs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No transactions for this day.</td></tr>';
+                return;
+            }
+
             dayTxs.forEach(tx => {
                 const timeStr = new Date(tx.created_at).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
                 tbody.innerHTML += `<tr>
-                    <td>${timeStr}</td>
-                    <td style="font-family: monospace;">${tx.receipt}</td>
-                    <td>${tx.phone}</td>
-                    <td class="success">Ksh ${tx.amount}</td>
+                    <td class="tx-time">${timeStr}</td>
+                    <td class="tx-receipt">${tx.receipt}</td>
+                    <td class="tx-phone">${tx.phone}</td>
+                    <td class="tx-amount" style="text-align:right;">Ksh ${Number(tx.amount).toLocaleString('en-KE', {minimumFractionDigits: 2})}</td>
                 </tr>`;
             });
         }
@@ -243,14 +825,27 @@
             fetch('/api/admin/cashiers').then(r=>r.json()).then(data => {
                 const tbody = document.getElementById('cashierTable');
                 tbody.innerHTML = '';
+                if (data.cashiers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="empty-state">No cashiers found.</td></tr>';
+                    return;
+                }
                 data.cashiers.forEach(c => {
                     const storeName = c.store_id === '3007' ? 'Gatunga' : 'Marimanti';
+                    const badgeClass = c.store_id === '3007' ? 'gatunga' : 'marimanti';
                     tbody.innerHTML += `<tr>
-                        <td>${c.username}</td>
-                        <td>${storeName}</td>
-                        <td>
-                            <button class="btn-small btn-edit" onclick="editCashier(${c.id}, '${c.username}', '${c.store_id}')">Edit</button>
-                            <button class="btn-small btn-danger" onclick="deleteCashier(${c.id}, '${c.username}')">Delete</button>
+                        <td style="font-weight:600;color:var(--text-main);">${c.username}</td>
+                        <td><span class="branch-badge ${badgeClass}">${storeName}</span></td>
+                        <td style="text-align:right;">
+                            <div class="actions-cell">
+                                <button class="btn-small btn-edit" onclick="editCashier(${c.id}, '${c.username}', '${c.store_id}')">
+                                    <span class="material-symbols-outlined icon-sm">edit</span>
+                                    Edit
+                                </button>
+                                <button class="btn-small btn-danger" onclick="deleteCashier(${c.id}, '${c.username}')">
+                                    <span class="material-symbols-outlined icon-sm">delete</span>
+                                    Delete
+                                </button>
+                            </div>
                         </td>
                     </tr>`;
                 });
@@ -281,19 +876,21 @@
         }
 
         function editCashier(id, username, store_id) {
-            document.getElementById('cashierFormTitle').innerText = "Edit Cashier Details";
+            document.getElementById('cashierFormTitle').innerHTML = `<span class="material-symbols-outlined">edit</span> Edit Cashier Details`;
             document.getElementById('editCashierId').value = id;
             document.getElementById('newUsername').value = username;
             document.getElementById('newPassword').value = ''; 
             document.getElementById('newStore').value = store_id;
-            
-            document.getElementById('cashierSubmitBtn').innerText = "Update";
+
+            document.getElementById('cashierSubmitBtn').innerHTML = `<span class="material-symbols-outlined icon-sm">save</span> Update`;
+            document.getElementById('cashierSubmitBtn').classList.remove('btn-success');
+            document.getElementById('cashierSubmitBtn').classList.add('btn-edit');
             document.getElementById('cashierCancelBtn').classList.remove('hidden');
-            window.scrollTo(0, 0);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function deleteCashier(id, username) {
-            if(confirm(`Are you sure you want to completely delete the cashier: ${username}?`)) {
+            if(confirm(`Are you sure you want to delete cashier: ${username}?`)) {
                 fetch(`/api/admin/cashiers/${id}`, { method: 'DELETE' }).then(r=>r.json()).then(data => {
                     if(data.success) loadCashiers();
                 });
@@ -301,12 +898,14 @@
         }
 
         function resetCashierForm() {
-            document.getElementById('cashierFormTitle').innerText = "Create New Cashier";
+            document.getElementById('cashierFormTitle').innerHTML = `<span class="material-symbols-outlined">person_add</span> Create New Cashier`;
             document.getElementById('editCashierId').value = '';
             document.getElementById('newUsername').value = '';
             document.getElementById('newPassword').value = '';
             document.getElementById('newStore').value = '3007';
-            document.getElementById('cashierSubmitBtn').innerText = "Create";
+            document.getElementById('cashierSubmitBtn').innerHTML = `<span class="material-symbols-outlined icon-sm">add</span> Create`;
+            document.getElementById('cashierSubmitBtn').classList.add('btn-success');
+            document.getElementById('cashierSubmitBtn').classList.remove('btn-edit');
             document.getElementById('cashierCancelBtn').classList.add('hidden');
         }
 
